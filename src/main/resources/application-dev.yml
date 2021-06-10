@@ -1,0 +1,24 @@
+# Spring Boot configuration
+spring:
+  # Database
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: jdbc:postgresql://localhost:5432/devdb
+    username: dev
+    password: letmein
+  # JPA properties
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+# Logger configuration
+logging:
+  level:
+    org.springframework: info
+    org.hibernate: info
+# Server configuration
+server:
+  port: 8080
