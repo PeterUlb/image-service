@@ -19,6 +19,14 @@ logging:
   level:
     org.springframework: info
     org.hibernate: info
+    io.ulbrich: debug
 # Server configuration
 server:
   port: 8080
+
+# Custom
+srv:
+  redis:
+    url: redis://localhost:6379
+  country-api:
+    url: https://restcountries.eu/rest

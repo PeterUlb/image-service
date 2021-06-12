@@ -1,6 +1,7 @@
 package io.ulbrich.imageservice.controller;
 
 import io.ulbrich.imageservice.client.CountryClient;
+import io.ulbrich.imageservice.exception.ExampleException;
 import io.ulbrich.imageservice.interceptor.RateLimited;
 import io.ulbrich.imageservice.model.Country;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,8 +21,12 @@ public class CountryDemoController {
     }
 
     @GetMapping("/{name}")
-    @RateLimited(group = 1)
+    @RateLimited(group = 9998)
     public List<Country> name(@PathVariable String name) {
+        if (name.equals("exception")) {
+            throw new ExampleException("Example");
+        }
+
         return countryClient.getByName(name);
     }
 }

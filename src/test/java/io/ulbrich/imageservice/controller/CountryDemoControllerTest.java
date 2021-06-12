@@ -1,38 +1,31 @@
 package io.ulbrich.imageservice.controller;
 
-import containers.Containers;
+import io.ulbrich.imageservice.client.CountryClient;
+import io.ulbrich.imageservice.model.Country;
+import org.assertj.core.util.Lists;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
+import org.mockito.Mockito;
 
-import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import java.util.List;
 
-@SpringBootTest
-@AutoConfigureMockMvc
-@ExtendWith(Containers.class)
-@ActiveProfiles("test")
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.BDDMockito.*;
+
 class CountryDemoControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    private final CountryClient countryClient = Mockito.mock(CountryClient.class);
+    private final CountryDemoController countryDemoController = new CountryDemoController(countryClient);
 
     @Test
-    void name() throws Exception {
-        mockMvc.perform(get("/country/{name}", "germany")
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].name")
-                        .value("MockDeutschland"))
-                .andExpect(jsonPath("$[0].capital")
-                        .value("MockBerlin"));
+    void name() {
+        List<Country> exp = Lists.list(new Country("GermanyTest", "DE", "BerlinTest", Lists.emptyList()));
+        given(countryClient.getByName(eq("Germany"))).willReturn(exp);
+
+        //when
+        List<Country> countries = countryDemoController.name("Germany");
+
+        then(countryClient).should().getByName("Germany");
+
+        assertThat(countries).isEqualTo(exp);
     }
 }

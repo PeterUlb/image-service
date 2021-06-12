@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.List;
 
-@FeignClient(name = "country-api", url = "${country-api.url}")
+@FeignClient(name = "country-api", url = "${srv.country-api.url}")
 @RequestMapping(value = "/v2")
 public interface CountryClient {
     @RequestMapping(method = RequestMethod.GET, value = "/name/{name}")

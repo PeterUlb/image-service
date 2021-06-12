@@ -3,6 +3,3 @@ spring:
     loadbalancer:
       ribbon:
         enable: false
-
-country-api:
-  url: https://restcountries.eu/rest

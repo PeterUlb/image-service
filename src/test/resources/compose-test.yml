@@ -14,3 +14,9 @@ services:
     command: --port 8080
     ports:
       - "8080:8080"
+
+  redis:
+    ports:
+      - "6379:6379"
+    image: "redis:alpine"
+    command: [ sh, -c, "rm -f /data/dump.rdb && redis-server --save ''" ]
