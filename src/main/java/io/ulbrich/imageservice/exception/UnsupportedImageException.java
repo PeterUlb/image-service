@@ -1,7 +1,7 @@
 package io.ulbrich.imageservice.exception;
 
 public class UnsupportedImageException extends RuntimeException {
-    private String detectedType;
+    private final String detectedType;
 
     public UnsupportedImageException(String detectedType) {
         this.detectedType = detectedType;
@@ -14,9 +14,5 @@ public class UnsupportedImageException extends RuntimeException {
 
     public String getDetectedType() {
         return detectedType;
-    }
-
-    public void setDetectedType(String detectedType) {
-        this.detectedType = detectedType;
     }
 }

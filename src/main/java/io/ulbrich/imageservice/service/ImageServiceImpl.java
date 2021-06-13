@@ -1,6 +1,7 @@
 package io.ulbrich.imageservice.service;
 
-import com.google.cloud.storage.Blob;
+import com.google.cloud.storage.BlobId;
+import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
 import io.ulbrich.imageservice.config.UploadProperties;
 import io.ulbrich.imageservice.dto.ImageUploadRequestDto;
@@ -22,11 +23,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.xml.sax.SAXException;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.channels.Channels;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -60,7 +59,7 @@ public class ImageServiceImpl implements ImageService {
             tags = null;
         }
 
-        Image image = Image.withInitialState(generateExternalKey(),
+        var image = Image.withInitialState(generateExternalKey(),
                 accountId,
                 imageUploadRequestDto.getTitle(),
                 imageUploadRequestDto.getDescription(),
@@ -82,12 +81,12 @@ public class ImageServiceImpl implements ImageService {
         }
 
         Metadata metadata;
-        Blob blob = storage.get(uploadProperties.getBucket(), imageKey);
+        var blob = storage.get(uploadProperties.getBucket(), imageKey);
         if (blob == null) {
             return;
         }
 
-        try (InputStream inputStream = Channels.newInputStream(blob.reader())) {
+        try (var inputStream = Channels.newInputStream(blob.reader())) {
             metadata = tikaUtil.extractMetadata(inputStream);
         } catch (IOException | TikaException | SAXException e) {
             LOG.error("Error while reading object: " + e.getMessage());
@@ -95,7 +94,7 @@ public class ImageServiceImpl implements ImageService {
             return;
         }
 
-        String mimeType = tikaUtil.getContentType(metadata).orElseThrow(); // TODO
+        var mimeType = tikaUtil.getContentType(metadata).orElseThrow(); // TODO
         LOG.debug(mimeType);
 
         boolean supported = switch (mimeType) {
@@ -111,17 +110,17 @@ public class ImageServiceImpl implements ImageService {
 
         long height = tikaUtil.getHeight(metadata);
         long width = tikaUtil.getWidth(metadata);
-        LOG.debug("Height: " + height);
-        LOG.debug("Width: " + width);
+        LOG.debug("Height: {}", height);
+        LOG.debug("Width: {}", width);
 
-        Image image = imageRepository.findByExternalKey(externalId).orElse(null);
+        var image = imageRepository.findByExternalKey(externalId).orElse(null);
         if (image == null) {
-            LOG.error("Could not find db entry for object in message " + imageKey);
+            LOG.error("Could not find db entry for object in message {}", imageKey);
             return;
         }
 
-        MimeTypes allTypes = MimeTypes.getDefaultMimeTypes();
-        String mimeTypeExtension = null;
+        var allTypes = MimeTypes.getDefaultMimeTypes();
+        String mimeTypeExtension;
         try {
             mimeTypeExtension = allTypes.forName(mimeType).getExtension();
         } catch (MimeTypeException e) {
@@ -136,13 +135,30 @@ public class ImageServiceImpl implements ImageService {
 
     @Override
     public Set<String> getSignedUrlsByTag(String tag) {
-        return null;
+        var imageTag = imageTagService.find(tag).orElse(null);
+        if (imageTag == null) {
+            return Collections.emptySet();
+        }
+
+        Set<Image> images = imageTag.getImages();
+        Set<String> signedUrls = new HashSet<>(images.size());
+        for (Image image : images) {
+            if (image.getImageStatus() != ImageStatus.VERIFIED) {
+                continue;
+            }
+
+            var blobInfo = BlobInfo.newBuilder(BlobId.of(uploadProperties.getBucket(), "images/" + image.getExternalKey())).build();
+            var url = storage.signUrl(blobInfo, 10, TimeUnit.MINUTES, Storage.SignUrlOption.withV4Signature());
+            signedUrls.add(url.toExternalForm());
+        }
+
+        return signedUrls;
     }
 
     private void insertMissingImageTags(List<String> tags) {
         Set<String> existingTags = imageTagService.find(tags).stream().map(ImageTag::getTag).collect(Collectors.toSet());
 
-        int inserted = 0;
+        var inserted = 0;
         for (String tag : tags) {
             if (!existingTags.contains(tag)) {
                 imageTagService.insertTag(tag);
@@ -150,7 +166,7 @@ public class ImageServiceImpl implements ImageService {
             }
         }
 
-        LOG.debug(String.format("Inserted %d missing tags", inserted));
+        LOG.debug("Inserted {} missing tags", inserted);
     }
 
     private String generateExternalKey() {

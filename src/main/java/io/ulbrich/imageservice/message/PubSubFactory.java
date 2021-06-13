@@ -48,10 +48,10 @@ public class PubSubFactory {
                     .build(); // Builder default
         }
 
-        ProjectSubscriptionName projectSubscriptionName =
+        var projectSubscriptionName =
                 ProjectSubscriptionName.of(gcpProjectIdProvider.getProjectId(), subscriptionName);
 
-        FlowControlSettings flowControlSettings =
+        var flowControlSettings =
                 FlowControlSettings.newBuilder()
                         .setMaxOutstandingElementCount(queueSize)
                         .build();
@@ -59,7 +59,7 @@ public class PubSubFactory {
         ExecutorProvider executorProvider =
                 InstantiatingExecutorProvider.newBuilder().setExecutorThreadCount(poolSize).build();
 
-        Subscriber.Builder builder = Subscriber.newBuilder(projectSubscriptionName, receiver)
+        var builder = Subscriber.newBuilder(projectSubscriptionName, receiver)
                 .setCredentialsProvider(credentialsProvider)
                 .setChannelProvider(channelProvider)
                 .setFlowControlSettings(flowControlSettings)

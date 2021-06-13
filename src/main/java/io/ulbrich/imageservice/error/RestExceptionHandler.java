@@ -18,7 +18,7 @@ import java.util.List;
 public class RestExceptionHandler {
     @ExceptionHandler(ExampleException.class)
     public ResponseEntity<ApiError> handleExampleException(ExampleException ex) {
-        ApiError apiError = new ApiError(ApiError.Type.EXAMPLE_ERROR, ex.getClass().getName());
+        var apiError = new ApiError(ApiError.Type.EXAMPLE_ERROR, ex.getClass().getName());
         return ResponseEntity.status(apiError.getStatus()).body(apiError);
     }
 
@@ -32,7 +32,7 @@ public class RestExceptionHandler {
             errors.add(error.getObjectName() + ": " + error.getDefaultMessage());
         }
 
-        ApiError apiError = new ApiError(ApiError.Type.ARGUMENTS_INVALID, errors);
+        var apiError = new ApiError(ApiError.Type.ARGUMENTS_INVALID, errors);
         return ResponseEntity.status(apiError.getStatus()).body(apiError);
     }
 }

@@ -48,7 +48,7 @@ public class ImageUploadedReceiver implements MessageReceiver {
         LOG.debug("Starting Receiver");
 
         try (subscriptionAdminClient) {
-            ProjectSubscriptionName subscriptionName = ProjectSubscriptionName.of(gcpProjectIdProvider.getProjectId(), uploadProperties.getSubscriptionName());
+            var subscriptionName = ProjectSubscriptionName.of(gcpProjectIdProvider.getProjectId(), uploadProperties.getSubscriptionName());
             subscriptionAdminClient.getSubscription(subscriptionName); //NodeJS has exists which calls metadata, java doesn't have this :/
             //This needs Pub/Sub Viewer role
         } catch (Exception e) {
@@ -70,8 +70,10 @@ public class ImageUploadedReceiver implements MessageReceiver {
 
     @Override
     public void receiveMessage(PubsubMessage message, AckReplyConsumer consumer) {
-        LOG.debug(message.getData().toStringUtf8());
-        JsonNode json = null;
+        if (LOG.isDebugEnabled()) {
+            LOG.debug(message.getData().toStringUtf8());
+        }
+        JsonNode json;
         try {
             json = new ObjectMapper().readTree(message.getData().toStringUtf8());
             String key = json.at("/name").asText();

@@ -22,9 +22,9 @@ public class TikaUtil {
     }
 
     public Metadata extractMetadata(InputStream inputStream) throws TikaException, SAXException, IOException {
-        BodyContentHandler handler = new BodyContentHandler();
-        Metadata metadata = new Metadata();
-        ParseContext context = new ParseContext();
+        var handler = new BodyContentHandler();
+        var metadata = new Metadata();
+        var context = new ParseContext();
         parser.parse(inputStream, handler, metadata, context);
         return metadata;
     }
@@ -42,8 +42,7 @@ public class TikaUtil {
                     throw new NoSuchElementException();
                 }
                 return Long.parseLong(h.substring(0, h.indexOf(" ")));
-            case "image/png":
-            case "image/gif":
+            case "image/png", "image/gif":
                 h = metadata.get("height");
                 if (h == null) {
                     throw new NoSuchElementException();
@@ -67,8 +66,7 @@ public class TikaUtil {
                     throw new NoSuchElementException();
                 }
                 return Long.parseLong(h.substring(0, h.indexOf(" ")));
-            case "image/png":
-            case "image/gif":
+            case "image/png", "image/gif":
                 h = metadata.get("width");
                 if (h == null) {
                     throw new NoSuchElementException();

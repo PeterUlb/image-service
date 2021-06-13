@@ -28,11 +28,12 @@ public class ImageTagServiceImpl implements ImageTagService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     @Override
     public void insertTag(String tag) {
-        ImageTag imageTag = new ImageTag();
+        var imageTag = new ImageTag();
         imageTag.setTag(tag);
         try {
             imageTagRepository.saveAndFlush(imageTag);
         } catch (PersistenceException ignored) {
+            // Ignore, Tag might have been inserted in parallel
         }
     }
 

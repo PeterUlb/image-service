@@ -31,7 +31,7 @@ public class RateLimiterInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        RateLimited rateLimited = handlerMethod.getMethodAnnotation(RateLimited.class);
+        var rateLimited = handlerMethod.getMethodAnnotation(RateLimited.class);
         if (rateLimited == null) {
             return true;
         }
@@ -43,7 +43,7 @@ public class RateLimiterInterceptor implements HandlerInterceptor {
 
         try {
             if (rateLimitService.isRateLimited(subject, rateLimited.group())) {
-                ApiError apiError = new ApiError(ApiError.Type.RATE_LIMITED, "Limit exceeded for " + rateLimited.group());
+                var apiError = new ApiError(ApiError.Type.RATE_LIMITED, "Limit exceeded for " + rateLimited.group());
 
                 response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
                 response.setContentType("application/json");

@@ -63,7 +63,7 @@ public class Image {
     private LocalDateTime updatedAt;
 
     public static Image withInitialState(String externalKey, UUID accountId, String title, String description, String fileName, Long size, ImagePrivacy privacy, Set<ImageTag> tags) {
-        Image image = new Image();
+        var image = new Image();
         image.setExternalKey(externalKey);
         image.setAccountId(accountId);
         image.setTitle(title);

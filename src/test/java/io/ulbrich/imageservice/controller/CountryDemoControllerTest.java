@@ -9,7 +9,8 @@ import org.mockito.Mockito;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.BDDMockito.*;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 
 class CountryDemoControllerTest {
 
@@ -19,7 +20,7 @@ class CountryDemoControllerTest {
     @Test
     void name() {
         List<Country> exp = Lists.list(new Country("GermanyTest", "DE", "BerlinTest", Lists.emptyList()));
-        given(countryClient.getByName(eq("Germany"))).willReturn(exp);
+        given(countryClient.getByName("Germany")).willReturn(exp);
 
         //when
         List<Country> countries = countryDemoController.name("Germany");

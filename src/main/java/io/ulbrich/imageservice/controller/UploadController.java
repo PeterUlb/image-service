@@ -9,15 +9,12 @@ import io.ulbrich.imageservice.dto.ImageUploadInfoDto;
 import io.ulbrich.imageservice.dto.ImageUploadRequestDto;
 import io.ulbrich.imageservice.interceptor.RateLimited;
 import io.ulbrich.imageservice.service.ImageService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.ws.rs.core.Response;
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -27,8 +24,6 @@ import java.util.concurrent.TimeUnit;
 @RestController
 @RequestMapping("/api/v1/image")
 public class UploadController {
-    private static Logger LOG = LoggerFactory.getLogger(UploadController.class);
-
     private final Storage storage;
     private final UploadProperties uploadProperties;
     private final ImageService imageService;
@@ -42,26 +37,17 @@ public class UploadController {
     @PostMapping("/request")
     @RateLimited(group = 1)
     public ResponseEntity<ImageUploadInfoDto> signed(@Valid @RequestBody ImageUploadRequestDto imageUploadRequestDto) {
-//        String externalKey = imageService.createImageEntry(imageUploadRequestDto, UUID.fromString(jwt.getSubject()));
         String externalKey = imageService.createImageEntry(imageUploadRequestDto, UUID.randomUUID());
 
-//        List<Acl> aclList;
-//        if (imageUploadRequestDto.getPrivacy().equals(ImagePrivacy.PUBLIC)) {
-//            aclList = List.of(Acl.of(Acl.User.ofAllUsers(), Acl.Role.READER));
-//        } else {
-//            aclList = Collections.emptyList();
-//        }
-
-        BlobInfo blobInfo = BlobInfo.newBuilder(BlobId.of(uploadProperties.getBucket(), "images/" + externalKey))
+        var blobInfo = BlobInfo.newBuilder(BlobId.of(uploadProperties.getBucket(), "images/" + externalKey))
                 .setContentType(MediaType.IMAGE_PNG_VALUE)
                 .setMetadata(Map.of("owner", "TEST")) //jwt.getSubject()))
-//                .setAcl(aclList)
                 .build();
         Map<String, String> extensionHeaders = new HashMap<>();
         extensionHeaders.put("x-goog-content-length-range", "1," + imageUploadRequestDto.getSize());
         extensionHeaders.put("Content-Type", "image/png");
 
-        URL url =
+        var url =
                 storage.signUrl(
                         blobInfo,
                         15,

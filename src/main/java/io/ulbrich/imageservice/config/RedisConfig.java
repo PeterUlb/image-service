@@ -12,7 +12,7 @@ public class RedisConfig {
 
     @Bean
     public JedisPool jedisPool(RedisProperties redisProperties) {
-        JedisPoolConfig poolConfig = new JedisPoolConfig();
+        var poolConfig = new JedisPoolConfig();
         poolConfig.setTestOnBorrow(true);
         poolConfig.setTestWhileIdle(true);
 
