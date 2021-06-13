@@ -1,0 +1,28 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: image-service-config
+data:
+#  Why is project-id not inferred by the key? gcpProjectIdProvider.getProjectId() can be null for some reason
+  application.yml: |-
+    srv:
+      upload:
+        bucket: bucket-string
+        subscriptionName: subcription-string
+        pool-size: 3
+        queue-size: 100
+      redis:
+        url: redis://localhost:1234
+      country-api:
+        url: https://country-api/rest
+    spring:
+      datasource:
+        url: jdbc:postgresql://127.0.0.1:5432/dbname
+      cloud:
+        gcp:
+          project-id: project-id-string
+          credentials:
+            location: file:/etc/secrets/key/gcp/gcp_key.json
+    logging:
+      level:
+        io.ulbrich: warn

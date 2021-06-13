@@ -1,14 +1,29 @@
 spring:
-  cloud:
-    loadbalancer:
-      ribbon:
-        enable: false
+  application:
+    name: image-service
+  config:
+    # https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.external-config.files.configtree
+    import: "optional:file:/etc/config/properties/application.yml,optional:configtree:/etc/secrets/properties/"
+  datasource:
+    driver-class-name: org.postgresql.Driver
+  # JPA properties
   jpa:
     hibernate:
       ddl-auto: validate
-  flyway:
-    enabled: true
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
 srv:
   upload:
     pool-size: 3
     queue-size: 100
+management:
+  endpoint:
+    health:
+      probes:
+        enabled: true
+  health:
+    livenessState:
+      enabled: true
+    readinessState:
+      enabled: true

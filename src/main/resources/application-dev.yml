@@ -1,19 +1,16 @@
 # Spring Boot configuration
 spring:
+  config:
+    # https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.external-config.files.configtree
+    import: "optional:file:./dev.yml"
   # Database
   datasource:
-    driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/img_srv_db
     username: dev
     password: letmein
   # JPA properties
   jpa:
-    hibernate:
-      ddl-auto: validate
     show-sql: true
-    database: postgresql
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    open-in-view: false
 # Logger configuration
 logging:
   level:

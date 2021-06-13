@@ -52,7 +52,7 @@ public class ImageUploadedReceiver implements MessageReceiver {
             subscriptionAdminClient.getSubscription(subscriptionName); //NodeJS has exists which calls metadata, java doesn't have this :/
             //This needs Pub/Sub Viewer role
         } catch (Exception e) {
-            LOG.error("Error with Subscription " + uploadProperties.getSubscriptionName(), e);
+            LOG.error("Error with Subscription " + uploadProperties.getSubscriptionName() + "(" + gcpProjectIdProvider.getProjectId() + ")", e);
             shutdownManager.initiateShutdown(-1);
             return;
         }
