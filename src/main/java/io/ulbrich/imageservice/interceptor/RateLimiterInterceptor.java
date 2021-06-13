@@ -43,7 +43,7 @@ public class RateLimiterInterceptor implements HandlerInterceptor {
 
         try {
             if (rateLimitService.isRateLimited(subject, rateLimited.group())) {
-                ApiError apiError = new ApiError(HttpStatus.TOO_MANY_REQUESTS, ApiError.Type.RATE_LIMITED, "Limit exceeded for " + rateLimited.group());
+                ApiError apiError = new ApiError(ApiError.Type.RATE_LIMITED, "Limit exceeded for " + rateLimited.group());
 
                 response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
                 response.setContentType("application/json");

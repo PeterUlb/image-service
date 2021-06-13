@@ -16,7 +16,8 @@ public class Containers implements BeforeAllCallback, AfterAllCallback {
                 .withLocalCompose(true)
                 .withExposedService("country-service-mock_1", 8080)
                 .withExposedService("postgres_1", 5432)
-                .withExposedService("redis_1", 6379);
+                .withExposedService("redis_1", 6379)
+                .withExposedService("fake-gcs-server_1", 8080);
         environment.start();
 
         String countryServiceUrl = String.format("http://%s:%s",
@@ -28,10 +29,14 @@ public class Containers implements BeforeAllCallback, AfterAllCallback {
         String redisUrl = String.format("redis://%s:%s",
                 environment.getServiceHost("redis_1", 6379),
                 environment.getServicePort("redis_1", 6379));
+        String gcsUrl = String.format("http://%s:%s",
+                environment.getServiceHost("fake-gcs-server_1", 8080),
+                environment.getServicePort("fake-gcs-server_1", 8080));
 
         System.setProperty("srv.country-api.url", countryServiceUrl);
         System.setProperty("spring.datasource.url", postgresUrl);
         System.setProperty("srv.redis.url", redisUrl);
+        System.setProperty("spring.cloud.gcp.datastore.host", gcsUrl);
     }
 
     @Override

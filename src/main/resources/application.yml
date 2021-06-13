@@ -3,3 +3,12 @@ spring:
     loadbalancer:
       ribbon:
         enable: false
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+srv:
+  upload:
+    pool-size: 3
+    queue-size: 100

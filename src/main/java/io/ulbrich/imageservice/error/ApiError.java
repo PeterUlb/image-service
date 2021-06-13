@@ -2,41 +2,40 @@ package io.ulbrich.imageservice.error;
 
 import org.springframework.http.HttpStatus;
 
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 
 public class ApiError {
     private final HttpStatus status;
-    private final long code;
+    private final String code;
     private final String message;
+    private final String time;
     private final List<String> errors;
 
-    public ApiError(HttpStatus status, Type type, List<String> errors) {
-        this.status = status;
+    public ApiError(Type type, List<String> errors) {
+        this.status = type.status;
         this.code = type.code;
         this.message = type.message;
         this.errors = errors;
+        this.time = LocalDateTime.now(ZoneOffset.UTC).format(DateTimeFormatter.ISO_DATE_TIME);
     }
 
-    public ApiError(HttpStatus status, Type type, String error) {
-        this.status = status;
-        this.code = type.code;
-        this.message = type.message;
-        this.errors = Collections.singletonList(error);
+    public ApiError(Type type, String error) {
+        this(type, Collections.singletonList(error));
     }
 
-    public ApiError(HttpStatus status, Type type) {
-        this.status = status;
-        this.code = type.code;
-        this.message = type.message;
-        this.errors = null;
+    public ApiError(Type type) {
+        this(type, Collections.emptyList());
     }
 
     public HttpStatus getStatus() {
         return status;
     }
 
-    public long getCode() {
+    public String getCode() {
         return code;
     }
 
@@ -44,18 +43,26 @@ public class ApiError {
         return message;
     }
 
+    public String getTime() {
+        return time;
+    }
+
     public List<String> getErrors() {
         return errors;
     }
 
     public enum Type {
-        ARGUMENTS_INVALID(3, "Invalid Arguments"), RATE_LIMITED(50, "Rate Limited"), EXAMPLE_ERROR(33, "Example Error");
+        ARGUMENTS_INVALID("GEN-INV-ARG", HttpStatus.BAD_REQUEST, "Invalid Arguments"),
+        RATE_LIMITED("GEN-RATE", HttpStatus.TOO_MANY_REQUESTS, "Rate Limited"),
+        EXAMPLE_ERROR("GEN-GEN", HttpStatus.CONFLICT, "Example Error");
 
-        private final long code;
+        private final String code;
+        private final HttpStatus status;
         private final String message;
 
-        Type(long code, String message) {
+        Type(String code, HttpStatus status, String message) {
             this.code = code;
+            this.status = status;
             this.message = message;
         }
     }

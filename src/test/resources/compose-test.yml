@@ -20,3 +20,9 @@ services:
       - "6379:6379"
     image: "redis:alpine"
     command: [ sh, -c, "rm -f /data/dump.rdb && redis-server --save ''" ]
+
+  fake-gcs-server:
+    build: fake-gcs-server
+    command: --port 8080
+    ports:
+      - "7071:8080"

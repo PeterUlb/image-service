@@ -3,13 +3,13 @@ spring:
   # Database
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/devdb
+    url: jdbc:postgresql://localhost:5432/img_srv_db
     username: dev
     password: letmein
   # JPA properties
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: true
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -19,6 +19,8 @@ logging:
   level:
     org.springframework: info
     org.hibernate: info
+    org.springframework.orm.jpa: info
+    org.springframework.transaction: info
     io.ulbrich: debug
 # Server configuration
 server:
