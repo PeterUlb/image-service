@@ -26,3 +26,9 @@ services:
     command: --port 8080
     ports:
       - "7071:8080"
+
+  gcp-pubsub-emulator:
+    image: "gcr.io/google.com/cloudsdktool/cloud-sdk:316.0.0-emulators"
+    ports:
+      - "7073:8080"
+    command: "gcloud beta emulators pubsub start --project image-service-test --host-port=0.0.0.0:8080"

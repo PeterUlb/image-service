@@ -26,7 +26,7 @@ public class PubSubFactory {
     private final GcpProjectIdProvider gcpProjectIdProvider;
     private final CredentialsProvider credentialsProvider;
 
-    @Value("${srv.gcp.pubsub-endpoint-override:#{null}}")
+    @Value("${spring.cloud.gcp.pubsub.emulator-host:#{null}}")
     private Optional<String> endpointOverride;
 
     public PubSubFactory(GcpProjectIdProvider gcpProjectIdProvider, CredentialsProvider credentialsProvider) {
@@ -37,7 +37,6 @@ public class PubSubFactory {
     public Subscriber createSubscriber(String subscriptionName, long queueSize, int poolSize, MessageReceiver receiver) {
         TransportChannelProvider channelProvider;
 
-        // TODO: Instead, endpointOverride should always be passed. But if type = plaintext it should use this channelProvider
         if (endpointOverride.isPresent()) {
             ManagedChannel channel = ManagedChannelBuilder.forTarget(endpointOverride.get()).usePlaintext().build();
             channelProvider = FixedTransportChannelProvider.create(GrpcTransportChannel.create(channel));

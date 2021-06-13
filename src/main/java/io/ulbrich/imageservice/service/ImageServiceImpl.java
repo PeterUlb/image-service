@@ -134,6 +134,7 @@ public class ImageServiceImpl implements ImageService {
     }
 
     @Override
+    @Transactional
     public Set<String> getSignedUrlsByTag(String tag) {
         var imageTag = imageTagService.find(tag).orElse(null);
         if (imageTag == null) {

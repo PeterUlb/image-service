@@ -56,10 +56,10 @@ public class Image {
     @Enumerated(EnumType.STRING)
     private ImageStatus imageStatus;
 
-    @Column(nullable = false, insertable = false)
+    @Column(insertable = false)
     private LocalDateTime createdAt;
 
-    @Column(nullable = false, insertable = false)
+    @Column(insertable = false)
     private LocalDateTime updatedAt;
 
     public static Image withInitialState(String externalKey, UUID accountId, String title, String description, String fileName, Long size, ImagePrivacy privacy, Set<ImageTag> tags) {
