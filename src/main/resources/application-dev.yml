@@ -1,30 +1,19 @@
-# Spring Boot configuration
+server:
+  port: 8080
+  error:
+    include-stacktrace: always
 spring:
   config:
     # https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.external-config.files.configtree
     import: "optional:file:./dev.yml"
-  # Database
-  datasource:
-    url: jdbc:postgresql://localhost:5432/img_srv_db
+
+srv:
+  pg:
+    host: localhost
+    port: 5432
+    database: img_srv_db
     username: dev
     password: letmein
-  # JPA properties
-  jpa:
-    show-sql: true
-# Logger configuration
-logging:
-  level:
-    org.springframework: info
-    org.hibernate: info
-    org.springframework.orm.jpa: info
-    org.springframework.transaction: info
-    io.ulbrich: debug
-# Server configuration
-server:
-  port: 8080
-
-# Custom
-srv:
   redis:
     url: redis://localhost:6379
   country-api:

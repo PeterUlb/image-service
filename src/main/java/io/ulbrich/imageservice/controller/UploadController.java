@@ -4,7 +4,7 @@ import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.HttpMethod;
 import com.google.cloud.storage.Storage;
-import io.ulbrich.imageservice.config.UploadProperties;
+import io.ulbrich.imageservice.config.ServiceProperties;
 import io.ulbrich.imageservice.dto.ImageUploadInfoDto;
 import io.ulbrich.imageservice.dto.ImageUploadRequestDto;
 import io.ulbrich.imageservice.interceptor.RateLimited;
@@ -25,12 +25,12 @@ import java.util.concurrent.TimeUnit;
 @RequestMapping("/api/v1/image")
 public class UploadController {
     private final Storage storage;
-    private final UploadProperties uploadProperties;
+    private final ServiceProperties serviceProperties;
     private final ImageService imageService;
 
-    public UploadController(Storage storage, UploadProperties uploadProperties, ImageService imageService) {
+    public UploadController(Storage storage, ServiceProperties serviceProperties, ImageService imageService) {
         this.storage = storage;
-        this.uploadProperties = uploadProperties;
+        this.serviceProperties = serviceProperties;
         this.imageService = imageService;
     }
 
@@ -39,7 +39,7 @@ public class UploadController {
     public ResponseEntity<ImageUploadInfoDto> signed(@Valid @RequestBody ImageUploadRequestDto imageUploadRequestDto) {
         String externalKey = imageService.createImageEntry(imageUploadRequestDto, UUID.randomUUID());
 
-        var blobInfo = BlobInfo.newBuilder(BlobId.of(uploadProperties.getBucket(), "images/" + externalKey))
+        var blobInfo = BlobInfo.newBuilder(BlobId.of(serviceProperties.getUpload().getBucket(), "images/" + externalKey))
                 .setContentType(MediaType.IMAGE_PNG_VALUE)
                 .setMetadata(Map.of("owner", "TEST")) //jwt.getSubject()))
                 .build();

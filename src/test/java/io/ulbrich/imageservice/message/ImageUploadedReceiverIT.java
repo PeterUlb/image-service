@@ -46,7 +46,7 @@ class ImageUploadedReceiverIT {
                     FixedTransportChannelProvider.create(GrpcTransportChannel.create(channel));
 
             Publisher publisher =
-                    Publisher.newBuilder(TopicName.newBuilder().setProject("image-service-test").setTopic("img-upload-test").build())
+                    Publisher.newBuilder(TopicName.newBuilder().setProject(Containers.mockProjectId).setTopic(Containers.mockTopic).build())
                             .setChannelProvider(channelProvider)
                             .setCredentialsProvider(credentialsProvider)
                             .build();
@@ -58,6 +58,6 @@ class ImageUploadedReceiverIT {
             channel.shutdown();
         }
 
-        Mockito.verify(imageService, Mockito.timeout(1000).atLeastOnce()).processImageAfterUpload(Mockito.any());
+        Mockito.verify(imageService, Mockito.timeout(4000).atLeastOnce()).processImageAfterUpload(Mockito.any());
     }
 }

@@ -3,7 +3,7 @@ package io.ulbrich.imageservice.service;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
-import io.ulbrich.imageservice.config.UploadProperties;
+import io.ulbrich.imageservice.config.ServiceProperties;
 import io.ulbrich.imageservice.dto.ImageUploadRequestDto;
 import io.ulbrich.imageservice.exception.UnsupportedImageException;
 import io.ulbrich.imageservice.model.Image;
@@ -36,14 +36,14 @@ public class ImageServiceImpl implements ImageService {
     private final ImageTagService imageTagService;
     private final TikaUtil tikaUtil;
     private final Storage storage;
-    private final UploadProperties uploadProperties;
+    private final ServiceProperties serviceProperties;
 
-    public ImageServiceImpl(ImageRepository imageRepository, ImageTagService imageTagService, TikaUtil tikaUtil, Storage storage, UploadProperties uploadProperties) {
+    public ImageServiceImpl(ImageRepository imageRepository, ImageTagService imageTagService, TikaUtil tikaUtil, Storage storage, ServiceProperties serviceProperties) {
         this.imageRepository = imageRepository;
         this.imageTagService = imageTagService;
         this.tikaUtil = tikaUtil;
         this.storage = storage;
-        this.uploadProperties = uploadProperties;
+        this.serviceProperties = serviceProperties;
     }
 
     @Override
@@ -81,7 +81,7 @@ public class ImageServiceImpl implements ImageService {
         }
 
         Metadata metadata;
-        var blob = storage.get(uploadProperties.getBucket(), imageKey);
+        var blob = storage.get(serviceProperties.getUpload().getBucket(), imageKey);
         if (blob == null) {
             return;
         }
@@ -148,7 +148,7 @@ public class ImageServiceImpl implements ImageService {
                 continue;
             }
 
-            var blobInfo = BlobInfo.newBuilder(BlobId.of(uploadProperties.getBucket(), "images/" + image.getExternalKey())).build();
+            var blobInfo = BlobInfo.newBuilder(BlobId.of(serviceProperties.getUpload().getBucket(), "images/" + image.getExternalKey())).build();
             var url = storage.signUrl(blobInfo, 10, TimeUnit.MINUTES, Storage.SignUrlOption.withV4Signature());
             signedUrls.add(url.toExternalForm());
         }

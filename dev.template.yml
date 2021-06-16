@@ -1,0 +1,26 @@
+server:
+  port: 8080
+  jpa:
+    show-sql: true
+srv:
+  pg:
+    host: localhost
+    port: 5432
+    database: my_db
+    username: dev
+    password: letmein
+  gcp:
+    project-id: test-project-292914
+    key-location: /etc/secrets/srv/gcp/key.json
+  upload:
+    bucket: my-bucket
+    subscriptionName: my-subscription
+    pool-size: 3
+    queue-size: 100
+logging:
+  level:
+    org.springframework: info
+    org.hibernate: info
+    org.springframework.orm.jpa: info
+    org.springframework.transaction: info
+    io.ulbrich: debug

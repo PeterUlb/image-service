@@ -3,9 +3,18 @@ apiVersion: v1
 metadata:
   name: image-service-config
 data:
-#  Why is project-id not inferred by the key? gcpProjectIdProvider.getProjectId() can be null for some reason
+  #  Why is project-id not inferred by the key? gcpProjectIdProvider.getProjectId() can be null for some reason
   application.yml: |-
+    server:
+      port: 8080
     srv:
+      pg:
+        host: localhost
+        port: 5432
+        database: img_srv_db
+      gcp:
+        project-id: project-id-string
+        key-location: /etc/secrets/srv/gcp/key.json
       upload:
         bucket: bucket-string
         subscriptionName: subcription-string
@@ -15,14 +24,6 @@ data:
         url: redis://localhost:1234
       country-api:
         url: https://country-api/rest
-    spring:
-      datasource:
-        url: jdbc:postgresql://127.0.0.1:5432/dbname
-      cloud:
-        gcp:
-          project-id: project-id-string
-          credentials:
-            location: file:/etc/secrets/key/gcp/gcp_key.json
     logging:
       level:
         io.ulbrich: warn

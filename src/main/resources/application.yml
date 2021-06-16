@@ -1,10 +1,16 @@
+server:
+  error:
+    include-stacktrace: never
 spring:
   application:
     name: image-service
   config:
     # https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.external-config.files.configtree
-    import: "optional:file:/etc/config/properties/application.yml,optional:configtree:/etc/secrets/properties/"
+    import: "optional:file:/etc/config/properties/application.yml,optional:configtree:/etc/secrets/"
   datasource:
+    url: jdbc:postgresql://${srv.pg.host}:${srv.pg.port}/${srv.pg.database}
+    username: ${srv.pg.username}
+    password: ${srv.pg.password}
     driver-class-name: org.postgresql.Driver
   # JPA properties
   jpa:
@@ -13,7 +19,14 @@ spring:
     database: postgresql
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     open-in-view: false
+  cloud:
+    gcp:
+      credentials:
+        location: file:${srv.gcp.key-location}
+      project-id: ${srv.gcp.project-id}
 srv:
+  gcp:
+    key-location: /etc/secrets/srv/gcp/key.json
   upload:
     pool-size: 3
     queue-size: 100

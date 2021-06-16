@@ -4,30 +4,33 @@ The image microservice for an Art Gallery App. Using Spring Boot, GCP, Tika and 
 Work in progress
 
 ## Design
+
 ![Design Picture](Initial_Design.png?raw=true "Design")
 
 ## Configuration
 
 ### Defaults
 
-Defaults are provided for all profiles in `src/main/resources/application[-profile].properties`.  
-
+Defaults are provided for all profiles in `src/main/resources/application[-profile].properties`.
 
 ### Override
 
-In addition to the standard spring boot locations, it is possible to provide overrides in different locations (depending on the profile).
+In addition to the standard spring boot locations, it is possible to provide overrides in different locations (depending
+on the profile).
+
 #### Dev Profile
+
 If you have additional properties to set (logging level) or are unhappy with the default (e.g. db port), you can place
 a `dev.yml` in the root directory. These values will be put on top of the "property resolution stack".
 
 #### Test
-Currently, no overrides are provided. Configuration is done automatically via testcontainers and
-lifecycle hooks.
+
+Currently, no overrides are provided. Configuration is done automatically via testcontainers and lifecycle hooks.
 
 #### Prod (K8S)
-Production profile allows `file:/etc/config/properties/application.yml` and `configtree:/etc/secrets/properties/`. The 
-secret properties are usually files like `spring.datasource.passsword` which are included by
-kubernetes as secrets
+
+Production profile allows `file:/etc/config/properties/application.yml` and `configtree:/etc/secrets/properties/`. The
+secret properties are usually files like `spring.datasource.passsword` which are included by kubernetes as secrets
 
 Templates for required confis and secrets can be found in `./k8s/templates`.
 
@@ -42,15 +45,16 @@ used via `docker-compose`, using `src/test/resources/compose-test.yml`).
 4. Redis
 5. Keycloak
 
-The compose-test can be reused for the local dev environment if required. Single components can be
-configured via configuration (see `dev.yml` above) to use the real service.
+The compose-test can be reused for the local dev environment if required. Single components can be configured via
+configuration (see `dev.yml` above) to use the real service.
 
-**TODO:** Check if there's a better way to provide dev defaults, without having too much duplication with
-the mock-compose.
+**TODO:** Check if there's a better way to provide dev defaults, without having too much duplication with the
+mock-compose.
 
 ## How To Test
-Integration Tests (*IT) require docker, since testcontainers are setup via docker-compose. Standard testing
-procedures apply.
+
+Integration Tests (*IT) require docker, since testcontainers are setup via docker-compose. Standard testing procedures
+apply.
 
 ## JWT from Dev Keycloak
 

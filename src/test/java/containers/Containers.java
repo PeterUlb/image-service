@@ -13,19 +13,34 @@ import com.google.pubsub.v1.PushConfig;
 import com.google.pubsub.v1.TopicName;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import org.junit.jupiter.api.extension.AfterAllCallback;
 import org.junit.jupiter.api.extension.BeforeAllCallback;
 import org.junit.jupiter.api.extension.ExtensionContext;
 import org.testcontainers.containers.DockerComposeContainer;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicBoolean;
 
-public class Containers implements BeforeAllCallback, AfterAllCallback {
-    private DockerComposeContainer<?> environment;
+public class Containers implements BeforeAllCallback, ExtensionContext.Store.CloseableResource {
+    private static final AtomicBoolean started = new AtomicBoolean(false);
+    public static String mockProjectId = "image-service-test";
+    public static String mockTopic = "img-upload-test";
+    public static String mockSubscription = "img-upload-test";
+    private static DockerComposeContainer<?> environment;
 
+    //Note: This is called beforeAll tests in a "test container", not once for all tests
     @Override
     public void beforeAll(ExtensionContext extensionContext) {
+        if (started.getAndSet(true)) {
+            return;
+        }
+
+        setup();
+        // Register in root store to register for closing at the very end (after all tests) (Ryuk would also cleanup)
+        extensionContext.getRoot().getStore(ExtensionContext.Namespace.GLOBAL).put(this.getClass(), this);
+    }
+
+    private void setup() {
         environment = new DockerComposeContainer<>(new File("src/test/resources/compose-test.yml"))
                 .withLocalCompose(true)
                 .withExposedService("country-service-mock_1", 8080)
@@ -38,9 +53,6 @@ public class Containers implements BeforeAllCallback, AfterAllCallback {
         String countryServiceUrl = String.format("http://%s:%s",
                 environment.getServiceHost("country-service-mock_1", 8080),
                 environment.getServicePort("country-service-mock_1", 8080));
-        String postgresUrl = String.format("jdbc:postgresql://%s:%s/imageservicedb",
-                environment.getServiceHost("postgres_1", 5432),
-                environment.getServicePort("postgres_1", 5432));
         String redisUrl = String.format("redis://%s:%s",
                 environment.getServiceHost("redis_1", 6379),
                 environment.getServicePort("redis_1", 6379));
@@ -54,31 +66,29 @@ public class Containers implements BeforeAllCallback, AfterAllCallback {
         initPubSub(pubSubEndpoint);
 
         System.setProperty("srv.country-api.url", countryServiceUrl);
-        System.setProperty("spring.datasource.url", postgresUrl);
+        System.setProperty("srv.pg.host", environment.getServiceHost("postgres_1", 5432));
+        System.setProperty("srv.pg.port", String.valueOf(environment.getServicePort("postgres_1", 5432)));
+        System.setProperty("srv.pg.database", "imageservicedb");
+        System.setProperty("srv.pg.username", "dev");
+        System.setProperty("srv.pg.password", "letmein");
+        System.setProperty("srv.gcp.project-id", mockProjectId);
+        System.setProperty("srv.upload.bucket", "mock-bucket");
+        System.setProperty("srv.upload.subscription-name", mockSubscription);
         System.setProperty("srv.redis.url", redisUrl);
-        System.setProperty("spring.cloud.gcp.project-id", "image-service-test");
+
         System.setProperty("spring.cloud.gcp.datastore.host", gcsUrl);
         System.setProperty("spring.cloud.gcp.pubsub.emulator-host", pubSubEndpoint);
-        System.setProperty("srv.upload.subscription-name", "img-upload-test-sub");
-    }
-
-    @Override
-    public void afterAll(ExtensionContext extensionContext) {
-        environment.stop();
     }
 
     private void initPubSub(String pubSubEndpoint) {
         ManagedChannel channel = ManagedChannelBuilder.forTarget(pubSubEndpoint).usePlaintext().build();
-        String subscriptionId = "img-upload-test-sub";
         try {
             TransportChannelProvider channelProvider =
                     FixedTransportChannelProvider.create(GrpcTransportChannel.create(channel));
             NoCredentialsProvider credentialsProvider = NoCredentialsProvider.create();
 
-            String topicId = "img-upload-test";
-            createTopic(topicId, channelProvider, credentialsProvider);
-
-            createSubscription(subscriptionId, topicId, channelProvider, credentialsProvider);
+            createTopic(mockTopic, channelProvider, credentialsProvider);
+            createSubscription(mockSubscription, mockTopic, channelProvider, credentialsProvider);
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {
@@ -92,7 +102,7 @@ public class Containers implements BeforeAllCallback, AfterAllCallback {
                 .setCredentialsProvider(credentialsProvider)
                 .build();
         try (TopicAdminClient topicAdminClient = TopicAdminClient.create(topicAdminSettings)) {
-            TopicName topicName = TopicName.of("image-service-test", topicId);
+            TopicName topicName = TopicName.of(mockProjectId, topicId);
             topicAdminClient.createTopic(topicName);
         }
     }
@@ -103,7 +113,14 @@ public class Containers implements BeforeAllCallback, AfterAllCallback {
                 .setCredentialsProvider(credentialsProvider)
                 .build();
         SubscriptionAdminClient subscriptionAdminClient = SubscriptionAdminClient.create(subscriptionAdminSettings);
-        ProjectSubscriptionName subscriptionName = ProjectSubscriptionName.of("image-service-test", subscriptionId);
-        subscriptionAdminClient.createSubscription(subscriptionName, TopicName.of("image-service-test", topicId), PushConfig.getDefaultInstance(), 10);
+        ProjectSubscriptionName subscriptionName = ProjectSubscriptionName.of(mockProjectId, subscriptionId);
+        subscriptionAdminClient.createSubscription(subscriptionName, TopicName.of(mockProjectId, topicId), PushConfig.getDefaultInstance(), 10);
+    }
+
+    @Override
+    public void close() throws Throwable {
+        if (environment != null) {
+            environment.stop();
+        }
     }
 }

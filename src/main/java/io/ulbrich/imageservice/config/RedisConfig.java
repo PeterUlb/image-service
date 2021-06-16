@@ -11,11 +11,11 @@ import java.net.URI;
 public class RedisConfig {
 
     @Bean
-    public JedisPool jedisPool(RedisProperties redisProperties) {
+    public JedisPool jedisPool(ServiceProperties serviceProperties) {
         var poolConfig = new JedisPoolConfig();
         poolConfig.setTestOnBorrow(true);
         poolConfig.setTestWhileIdle(true);
 
-        return new JedisPool(poolConfig, URI.create(redisProperties.getUrl()), redisProperties.getTimeout());
+        return new JedisPool(poolConfig, URI.create(serviceProperties.getRedis().getUrl()), serviceProperties.getRedis().getTimeout());
     }
 }

@@ -9,7 +9,7 @@ import com.google.cloud.pubsub.v1.Subscriber;
 import com.google.cloud.pubsub.v1.SubscriptionAdminClient;
 import com.google.pubsub.v1.ProjectSubscriptionName;
 import com.google.pubsub.v1.PubsubMessage;
-import io.ulbrich.imageservice.config.UploadProperties;
+import io.ulbrich.imageservice.config.ServiceProperties;
 import io.ulbrich.imageservice.service.ImageService;
 import io.ulbrich.imageservice.util.ShutdownManager;
 import org.slf4j.Logger;
@@ -26,7 +26,7 @@ public class ImageUploadedReceiver implements MessageReceiver {
     private static final Logger LOG = LoggerFactory.getLogger(ImageUploadedReceiver.class);
 
     private final PubSubFactory pubSubFactory;
-    private final UploadProperties uploadProperties;
+    private final ServiceProperties serviceProperties;
     private final ImageService imageService;
     private final ShutdownManager shutdownManager;
     private final SubscriptionAdminClient subscriptionAdminClient;
@@ -34,9 +34,9 @@ public class ImageUploadedReceiver implements MessageReceiver {
 
     Subscriber subscriber;
 
-    public ImageUploadedReceiver(PubSubFactory pubSubFactory, UploadProperties uploadProperties, ImageService imageService, ShutdownManager shutdownManager, SubscriptionAdminClient subscriptionAdminClient, GcpProjectIdProvider gcpProjectIdProvider) {
+    public ImageUploadedReceiver(PubSubFactory pubSubFactory, ServiceProperties serviceProperties, ImageService imageService, ShutdownManager shutdownManager, SubscriptionAdminClient subscriptionAdminClient, GcpProjectIdProvider gcpProjectIdProvider) {
         this.pubSubFactory = pubSubFactory;
-        this.uploadProperties = uploadProperties;
+        this.serviceProperties = serviceProperties;
         this.imageService = imageService;
         this.shutdownManager = shutdownManager;
         this.subscriptionAdminClient = subscriptionAdminClient;
@@ -48,17 +48,17 @@ public class ImageUploadedReceiver implements MessageReceiver {
         LOG.debug("Starting Receiver");
 
         try (subscriptionAdminClient) {
-            var subscriptionName = ProjectSubscriptionName.of(gcpProjectIdProvider.getProjectId(), uploadProperties.getSubscriptionName());
+            var subscriptionName = ProjectSubscriptionName.of(gcpProjectIdProvider.getProjectId(), serviceProperties.getUpload().getSubscriptionName());
             subscriptionAdminClient.getSubscription(subscriptionName); //NodeJS has exists which calls metadata, java doesn't have this :/
             //This needs Pub/Sub Viewer role
         } catch (Exception e) {
-            LOG.error("Error with Subscription " + uploadProperties.getSubscriptionName() + "(" + gcpProjectIdProvider.getProjectId() + ")", e);
+            LOG.error("Error with Subscription " + serviceProperties.getUpload().getSubscriptionName() + "(" + gcpProjectIdProvider.getProjectId() + ")", e);
             shutdownManager.initiateShutdown(-1);
             return;
         }
 
-        subscriber = pubSubFactory.createSubscriber(uploadProperties.getSubscriptionName(),
-                uploadProperties.getQueueSize(), uploadProperties.getPoolSize(), this);
+        subscriber = pubSubFactory.createSubscriber(serviceProperties.getUpload().getSubscriptionName(),
+                serviceProperties.getUpload().getQueueSize(), serviceProperties.getUpload().getPoolSize(), this);
         subscriber.startAsync().awaitRunning();
     }
 
