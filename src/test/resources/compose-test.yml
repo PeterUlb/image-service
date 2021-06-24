@@ -1,13 +1,32 @@
-version: "3.3"
+version: "3.8"
 services:
-  postgres:
-    image: "postgres:latest"
+  postgres-tmp:
+    image: postgres:latest
     environment:
-      POSTGRES_USER: "dev"
-      POSTGRES_PASSWORD: "letmein"
-      POSTGRES_DB: "imageservicedb"
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: letmein
+      POSTGRES_DB: img_srv_db
     ports:
       - "5555:5432"
+
+  postgres-persistent:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: letmein
+      POSTGRES_DB: img_srv_db
+    ports:
+      - "5555:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: letmein
+    ports:
+      - "5050:80"
 
   country-service-mock:
     build: country-service
@@ -16,9 +35,9 @@ services:
       - "8080:8080"
 
   redis:
+    image: redis:alpine
     ports:
       - "6379:6379"
-    image: "redis:alpine"
     command: [ sh, -c, "rm -f /data/dump.rdb && redis-server --save ''" ]
 
   fake-gcs-server:
@@ -28,7 +47,18 @@ services:
       - "7071:8080"
 
   gcp-pubsub-emulator:
-    image: "gcr.io/google.com/cloudsdktool/cloud-sdk:316.0.0-emulators"
+    image: gcr.io/google.com/cloudsdktool/cloud-sdk:316.0.0-emulators
     ports:
       - "7073:8080"
     command: "gcloud beta emulators pubsub start --project image-service-test --host-port=0.0.0.0:8080"
+
+volumes:
+  pgdata:
+
+#docker ps
+#docker inspect <postgres_hash> | grep IPAddress
+#docker exec -it <hash> bash
+
+#docker-compose -f compose-dev.yml up
+#docker-compose -f compose-dev.yml down [-v]
+#docker volume prune

@@ -10,7 +10,7 @@ spring:
 srv:
   pg:
     host: localhost
-    port: 5432
+    port: 5555
     database: img_srv_db
     username: dev
     password: letmein

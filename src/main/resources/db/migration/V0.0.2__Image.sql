@@ -22,7 +22,7 @@ CREATE TRIGGER set_update_timestamp
     BEFORE UPDATE
     ON image
     FOR EACH ROW
-EXECUTE PROCEDURE set_update_timestamp();
+    EXECUTE PROCEDURE set_update_timestamp();
 
 CREATE TABLE image_tag
 (
@@ -58,7 +58,7 @@ CREATE TRIGGER set_update_timestamp
     BEFORE UPDATE
     ON image_gallery
     FOR EACH ROW
-EXECUTE PROCEDURE set_update_timestamp();
+    EXECUTE PROCEDURE set_update_timestamp();
 
 CREATE TABLE image_gallery_image
 (
