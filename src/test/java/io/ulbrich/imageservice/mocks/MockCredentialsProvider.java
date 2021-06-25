@@ -1,4 +1,4 @@
-package io.ulbrich.imageservice;
+package io.ulbrich.imageservice.mocks;
 
 import com.google.api.gax.core.CredentialsProvider;
 import com.google.auth.Credentials;

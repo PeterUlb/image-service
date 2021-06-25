@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: letmein
       POSTGRES_DB: img_srv_db
     ports:
-      - "5555:5432"
+      - "5566:5432"
 
   postgres-persistent:
     image: postgres:latest
@@ -21,7 +21,7 @@ services:
       - pgdata:/var/lib/postgresql/data
 
   pgadmin:
-    image: dpage/pgadmin4
+    image: dpage/pgadmin4:latest
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: letmein
@@ -62,3 +62,5 @@ volumes:
 #docker-compose -f compose-dev.yml up
 #docker-compose -f compose-dev.yml down [-v]
 #docker volume prune
+
+#docker-compose -f /../image-srv/src/test/resources/compose-test.yml up --build -d fake-gcs-server ...

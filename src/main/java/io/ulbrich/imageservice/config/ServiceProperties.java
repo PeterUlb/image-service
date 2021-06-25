@@ -206,6 +206,8 @@ public class ServiceProperties {
         @NotEmpty
         private String projectId;
 
+        private String storageHost;
+
         public String getKeyLocation() {
             return keyLocation;
         }
@@ -220,6 +222,14 @@ public class ServiceProperties {
 
         public void setProjectId(String projectId) {
             this.projectId = projectId;
+        }
+
+        public String getStorageHost() {
+            return storageHost;
+        }
+
+        public void setStorageHost(String storageHost) {
+            this.storageHost = storageHost;
         }
     }
 }

@@ -12,15 +12,23 @@ import com.google.pubsub.v1.TopicName;
 import containers.Containers;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
-import io.ulbrich.imageservice.service.ImageService;
+import io.ulbrich.imageservice.model.Image;
+import io.ulbrich.imageservice.model.ImagePrivacy;
+import io.ulbrich.imageservice.model.ImageStatus;
+import io.ulbrich.imageservice.repository.ImageRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.util.Collections;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.awaitility.Awaitility.await;
 
 @SpringBootTest
 @ExtendWith(Containers.class)
@@ -33,12 +41,14 @@ class ImageUploadedReceiverIT {
     @Autowired
     private CredentialsProvider credentialsProvider;
 
-    @MockBean
-    private ImageService imageService;
+    @Autowired
+    private ImageRepository imageRepository;
 
     @Test
     void testPubSubConfirm() throws Exception {
-        Mockito.doNothing().when(imageService).processImageAfterUpload(Mockito.isA(String.class));
+        imageRepository.save(Image.withInitialState("BVXErLFEgv", UUID.randomUUID(), "mock", "mock",
+                "mock.png", 200L, ImagePrivacy.PUBLIC, Collections.emptySet()));
+        imageRepository.flush();
 
         ManagedChannel channel = ManagedChannelBuilder.forTarget(endpointOverride).usePlaintext().build();
         try {
@@ -58,6 +68,12 @@ class ImageUploadedReceiverIT {
             channel.shutdown();
         }
 
-        Mockito.verify(imageService, Mockito.timeout(4000).atLeastOnce()).processImageAfterUpload(Mockito.any());
+        await().atMost(5, TimeUnit.SECONDS).until(() -> {
+            var imageStatus = imageRepository.findByExternalKey("BVXErLFEgv").orElseThrow().getImageStatus();
+            return imageStatus.equals(ImageStatus.VERIFIED);
+        });
+        var image = imageRepository.findByExternalKey("BVXErLFEgv").orElse(null);
+        assertThat(image).isNotNull();
+        assertThat(image.getImageStatus()).isEqualTo(ImageStatus.VERIFIED);
     }
 }

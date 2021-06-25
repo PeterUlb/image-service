@@ -76,8 +76,8 @@ public class Containers implements BeforeAllCallback, ExtensionContext.Store.Clo
         System.setProperty("srv.upload.bucket", "mock-bucket");
         System.setProperty("srv.upload.subscription-name", mockSubscription);
         System.setProperty("srv.redis.url", redisUrl);
+        System.setProperty("srv.gcp.storage-host", gcsUrl);
 
-        System.setProperty("spring.cloud.gcp.datastore.host", gcsUrl);
         System.setProperty("spring.cloud.gcp.pubsub.emulator-host", pubSubEndpoint);
     }
 
