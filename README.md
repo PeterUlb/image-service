@@ -46,8 +46,9 @@ used via `docker-compose`, using `src/test/resources/compose-test.yml`).
 5. Keycloak
 
 The compose-test can be reused for the local dev environment if required (specify the services with
-`docker-compose up -f /.../image-srv/src/test/resources/compose-test.yml -d service1 service2`. Single components can be
+`docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d [service1 service2]`. Single components can be
 configured via configuration (see `dev.yml` above) to use the real service.
+Make sure to adjust  the config to match the service addresses (real or local).
 
 **TODO:** Check if there's a better way to provide dev defaults, without having too much duplication with the
 mock-compose.

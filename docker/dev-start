@@ -1,0 +1,3 @@
+#!/bin/bash
+docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d --remove-orphans --build
+echo "Postgres IP: $(docker inspect -f "{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}" docker_postgres_1)"

@@ -41,11 +41,10 @@ public class MockContainerExtension implements BeforeAllCallback, ExtensionConte
     }
 
     private void setup() {
-        environment = new DockerComposeContainer<>(new File("src/test/resources/compose-test.yml"))
+        environment = new DockerComposeContainer<>(new File("docker/docker-compose.yml"))
                 .withLocalCompose(true)
-                .withServices("country-service-mock", "postgres-tmp", "redis", "fake-gcs-server", "gcp-pubsub-emulator")
                 .withExposedService("country-service-mock_1", 8080)
-                .withExposedService("postgres-tmp_1", 5432)
+                .withExposedService("postgres_1", 5432)
                 .withExposedService("redis_1", 6379)
                 .withExposedService("fake-gcs-server_1", 8080)
                 .withExposedService("gcp-pubsub-emulator_1", 8080);
@@ -67,8 +66,8 @@ public class MockContainerExtension implements BeforeAllCallback, ExtensionConte
         initPubSub(pubSubEndpoint);
 
         System.setProperty("srv.country-api.url", countryServiceUrl);
-        System.setProperty("srv.pg.host", environment.getServiceHost("postgres-tmp_1", 5432));
-        System.setProperty("srv.pg.port", String.valueOf(environment.getServicePort("postgres-tmp_1", 5432)));
+        System.setProperty("srv.pg.host", environment.getServiceHost("postgres_1", 5432));
+        System.setProperty("srv.pg.port", String.valueOf(environment.getServicePort("postgres_1", 5432)));
         System.setProperty("srv.pg.database", "img_srv_db");
         System.setProperty("srv.pg.username", "dev");
         System.setProperty("srv.pg.password", "letmein");
