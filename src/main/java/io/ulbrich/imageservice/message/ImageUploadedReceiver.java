@@ -64,7 +64,7 @@ public class ImageUploadedReceiver implements MessageReceiver {
 
     @PreDestroy
     public void onStop() {
-        LOG.warn("Stopping Receiver");
+        LOG.debug("Stopping Receiver");
         subscriber.stopAsync();
     }
 

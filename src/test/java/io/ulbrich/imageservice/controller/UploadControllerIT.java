@@ -1,7 +1,7 @@
 package io.ulbrich.imageservice.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import containers.Containers;
+import containers.MockContainerExtension;
 import io.ulbrich.imageservice.dto.ImageUploadRequestDto;
 import io.ulbrich.imageservice.model.ImagePrivacy;
 import org.junit.jupiter.api.Test;
@@ -23,7 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ExtendWith(Containers.class)
+@ExtendWith(MockContainerExtension.class)
 @ActiveProfiles("test")
 class UploadControllerIT {
 

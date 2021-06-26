@@ -21,7 +21,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class Containers implements BeforeAllCallback, ExtensionContext.Store.CloseableResource {
+public class MockContainerExtension implements BeforeAllCallback, ExtensionContext.Store.CloseableResource {
     private static final AtomicBoolean started = new AtomicBoolean(false);
     public static String mockProjectId = "image-service-test";
     public static String mockTopic = "img-upload-test";

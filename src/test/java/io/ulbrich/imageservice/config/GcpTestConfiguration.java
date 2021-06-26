@@ -1,9 +1,14 @@
-package io.ulbrich.imageservice.mocks;
+package io.ulbrich.imageservice.config;
 
 import com.google.api.gax.core.CredentialsProvider;
 import com.google.auth.Credentials;
 import com.google.auth.ServiceAccountSigner;
-import org.springframework.stereotype.Component;
+import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
+import org.springframework.cloud.gcp.core.GcpProjectIdProvider;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
 import java.io.IOException;
 import java.net.URI;
@@ -11,12 +16,31 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
-@Component
-public class MockCredentialsProvider implements CredentialsProvider {
-    @Override
-    public Credentials getCredentials() throws IOException {
-        return new TestGcpCredentials();
+@Configuration
+@Profile("test")
+public class GcpTestConfiguration {
+    // No @Primary requires as all are @ConditionalOnMissingBean
+
+    @Bean
+    public Storage storage(CredentialsProvider credentialsProvider, GcpProjectIdProvider gcpProjectIdProvider, ServiceProperties serviceProperties) throws IOException {
+        return StorageOptions.newBuilder()
+                .setProjectId(gcpProjectIdProvider.getProjectId())
+                .setHost(serviceProperties.getGcp().getStorageHost())
+                .setCredentials(credentialsProvider.getCredentials())
+                .build()
+                .getService();
     }
+
+    @Bean
+    public CredentialsProvider credentialsProvider() {
+        return TestGcpCredentials::new;
+    }
+
+    @Bean
+    public GcpProjectIdProvider gcpProjectIdProvider(ServiceProperties serviceProperties) {
+        return () -> serviceProperties.getGcp().getProjectId();
+    }
+
 
     /**
      * Credentials is needed for the Emulator (injected into multiple places, replaces the DefaultCredentialsProvider)
