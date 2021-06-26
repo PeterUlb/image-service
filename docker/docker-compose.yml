@@ -1,0 +1,35 @@
+version: "3.8"
+services:
+  postgres:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: dev
+      POSTGRES_PASSWORD: letmein
+      POSTGRES_DB: img_srv_db
+
+  country-service-mock:
+    build: country-service
+    command: --port 8080
+
+  redis:
+    image: redis:alpine
+    command: [ sh, -c, "rm -f /data/dump.rdb && redis-server --save ''" ]
+
+  fake-gcs-server:
+    build: fake-gcs-server
+    command: --port 8080
+
+  gcp-pubsub-emulator:
+    image: gcr.io/google.com/cloudsdktool/cloud-sdk:316.0.0-emulators
+    command: "gcloud beta emulators pubsub start --project image-service-test --host-port=0.0.0.0:8080"
+
+#docker ps
+#docker inspect <postgres_hash> | grep IPAddress
+#docker inspect -f "{{range.NetworkSettings.Networks}}{{.IPAddress}}{{end}}" <postgres_name/hash>
+#docker exec -it <hash> bash
+
+#docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d [service1 service2]
+#docker-compose -f docker-compose.yml -f docker-compose.dev.yml down [-v]
+#docker volume prune
+
+#docker-compose -f /../image-srv/src/test/resources/docker-compose.yml -f /../image-srv/src/test/resources/docker-compose.dev.yml up --build -d fake-gcs-server ...
