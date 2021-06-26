@@ -1,6 +1,6 @@
 package io.ulbrich.imageservice.controller;
 
-import containers.Containers;
+import containers.MockContainerExtension;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@ExtendWith(Containers.class)
+@ExtendWith(MockContainerExtension.class)
 @ActiveProfiles("test")
 class CountryDemoControllerIT {
 

@@ -9,7 +9,7 @@ import com.google.cloud.pubsub.v1.Publisher;
 import com.google.protobuf.ByteString;
 import com.google.pubsub.v1.PubsubMessage;
 import com.google.pubsub.v1.TopicName;
-import containers.Containers;
+import containers.MockContainerExtension;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.ulbrich.imageservice.model.Image;
@@ -31,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 
 @SpringBootTest
-@ExtendWith(Containers.class)
+@ExtendWith(MockContainerExtension.class)
 @ActiveProfiles("test")
 class ImageUploadedReceiverIT {
 
@@ -56,7 +56,7 @@ class ImageUploadedReceiverIT {
                     FixedTransportChannelProvider.create(GrpcTransportChannel.create(channel));
 
             Publisher publisher =
-                    Publisher.newBuilder(TopicName.newBuilder().setProject(Containers.mockProjectId).setTopic(Containers.mockTopic).build())
+                    Publisher.newBuilder(TopicName.newBuilder().setProject(MockContainerExtension.mockProjectId).setTopic(MockContainerExtension.mockTopic).build())
                             .setChannelProvider(channelProvider)
                             .setCredentialsProvider(credentialsProvider)
                             .build();

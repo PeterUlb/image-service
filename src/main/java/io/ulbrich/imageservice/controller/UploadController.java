@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import javax.ws.rs.core.Response;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -63,11 +62,11 @@ public class UploadController {
     }
 
     @GetMapping("/tag/{tag}")
-    public Response getImagesByTag(@PathVariable String tag) {
+    public ResponseEntity<Set<String>> getImagesByTag(@PathVariable String tag) {
         Set<String> signedUrls = imageService.getSignedUrlsByTag(tag);
         if (signedUrls.isEmpty()) {
-            return Response.noContent().build();
+            return ResponseEntity.noContent().build();
         }
-        return Response.ok(signedUrls).build();
+        return ResponseEntity.ok(signedUrls);
     }
 }
