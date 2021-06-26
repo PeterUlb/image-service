@@ -86,11 +86,17 @@ public class ImageServiceImpl implements ImageService {
             return;
         }
 
+        var image = imageRepository.findByExternalKey(externalId).orElse(null);
+        if (image == null) {
+            LOG.error("Could not find db entry for object in message {}", imageKey);
+            return;
+        }
+
         try (var inputStream = Channels.newInputStream(blob.reader())) {
             metadata = tikaUtil.extractMetadata(inputStream);
         } catch (IOException | TikaException | SAXException e) {
             LOG.error("Error while reading object: " + e.getMessage());
-            imageRepository.findByExternalKey(externalId).ifPresent(image -> image.setImageStatus(ImageStatus.REJECTED));
+            image.setImageStatus(ImageStatus.REJECTED);
             return;
         }
 
@@ -104,7 +110,14 @@ public class ImageServiceImpl implements ImageService {
 
         if (!supported) {
             // TODO: DELETE, SET IMAGE STATUS, ...
-            imageRepository.findByExternalKey(externalId).ifPresent(image -> image.setImageStatus(ImageStatus.REJECTED));
+            LOG.debug("Reject image of type {}", mimeType);
+            image.setImageStatus(ImageStatus.REJECTED);
+            image.setWidth(null);
+            image.setHeight(null);
+            image.setMimeType(mimeType);
+            image.setExtension(null);
+            image.setSize(blob.getSize());
+            storage.delete(serviceProperties.getUpload().getBucket(), imageKey);
             return;
         }
 
@@ -112,12 +125,6 @@ public class ImageServiceImpl implements ImageService {
         long width = tikaUtil.getWidth(metadata);
         LOG.debug("Height: {}", height);
         LOG.debug("Width: {}", width);
-
-        var image = imageRepository.findByExternalKey(externalId).orElse(null);
-        if (image == null) {
-            LOG.error("Could not find db entry for object in message {}", imageKey);
-            return;
-        }
 
         var allTypes = MimeTypes.getDefaultMimeTypes();
         String mimeTypeExtension;
@@ -131,6 +138,8 @@ public class ImageServiceImpl implements ImageService {
         image.setHeight(height);
         image.setMimeType(mimeType);
         image.setExtension(mimeTypeExtension);
+        // Set the real size. The requested one is actually the maximum allowed and might differ
+        image.setSize(blob.getSize());
     }
 
     @Override
