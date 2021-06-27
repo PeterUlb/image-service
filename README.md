@@ -36,8 +36,7 @@ Templates for required confis and secrets can be found in `./k8s/templates`.
 
 ## Dependencies
 
-The following services are expected to run and be configured (for integration tests `wiremock` and `testcontainers` are
-used via `docker-compose`, using `src/test/resources/compose-test.yml`).
+The following services are expected to run and be configured.
 
 1. Postgres DB
 2. Cloud Storage
@@ -45,13 +44,14 @@ used via `docker-compose`, using `src/test/resources/compose-test.yml`).
 4. Redis
 5. Keycloak
 
-The compose-test can be reused for the local dev environment if required (specify the services with
-`docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d [service1 service2]`. Single components can be
-configured via configuration (see `dev.yml` above) to use the real service.
-Make sure to adjust  the config to match the service addresses (real or local).
-
-**TODO:** Check if there's a better way to provide dev defaults, without having too much duplication with the
-mock-compose.
+The docker compose file in `docker/docker-compose.yml` provides the defaults for the required services. This file
+is also used by the integration tests. No ports are necessary, as the ambassador container acts as a proxy.  
+Additionally, `docker/docker-compose.dev.yml` contains useful defaults for the local dev environment (stable ports, persistent db,
+db admin tool, ...).  
+It can be started with the command `docker-compose -f docker-compose.yml -f docker-compose.dev.yml 
+up -d [service1 service2]`. Single components can be configured via configuration (see `dev.yml` above) to use the real 
+service. Make sure to adjust the config to match the service addresses (real or local). The default settings for the
+dev profile match the docker-compose file.
 
 ## How To Test
 

@@ -1,0 +1,8 @@
+#!/bin/bash
+curl --location --request PUT 'http://localhost:7073/v1/projects/image-service-local/topics/image-uploaded-topic' \
+     --header 'Content-Type: application/json' \
+     --data-raw '{}'
+
+curl --location --request PUT 'http://localhost:7073/v1/projects/image-service-local/subscriptions/image-uploaded-sub' \
+     --header 'Content-Type: application/json' \
+     --data-raw '{"topic":"projects/image-service-local/topics/image-uploaded-topic"}'

@@ -83,6 +83,7 @@ public class ImageServiceImpl implements ImageService {
         Metadata metadata;
         var blob = storage.get(serviceProperties.getUpload().getBucket(), imageKey);
         if (blob == null) {
+            LOG.error("Could not find storage object for {}", imageKey);
             return;
         }
 

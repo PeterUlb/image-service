@@ -1,0 +1,6 @@
+#!/bin/bash
+echo -n "Enter image key: "
+read -r image_key
+curl --location --request POST 'http://localhost:7073/v1/projects/image-service-local/topics/image-uploaded-topic:publish' \
+     --header 'Content-Type: application/json' \
+     --data-raw '{"messages": [{"data": "'"$(echo -n {\"name\": \""$image_key"\"} | base64)"'"}]}'

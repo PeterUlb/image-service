@@ -9,6 +9,7 @@ import com.google.cloud.pubsub.v1.Subscriber;
 import com.google.cloud.pubsub.v1.SubscriptionAdminClient;
 import com.google.pubsub.v1.ProjectSubscriptionName;
 import com.google.pubsub.v1.PubsubMessage;
+import com.google.pubsub.v1.Subscription;
 import io.ulbrich.imageservice.config.ServiceProperties;
 import io.ulbrich.imageservice.service.ImageService;
 import io.ulbrich.imageservice.util.ShutdownManager;
@@ -19,6 +20,9 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import java.util.concurrent.Executors;
+import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class ImageUploadedReceiver implements MessageReceiver {
@@ -48,9 +52,16 @@ public class ImageUploadedReceiver implements MessageReceiver {
         LOG.debug("Starting Receiver");
 
         try (subscriptionAdminClient) {
-            var subscriptionName = ProjectSubscriptionName.of(gcpProjectIdProvider.getProjectId(), serviceProperties.getUpload().getSubscriptionName());
-            subscriptionAdminClient.getSubscription(subscriptionName); //NodeJS has exists which calls metadata, java doesn't have this :/
-            //This needs Pub/Sub Viewer role
+            // getRetrySettings().getTotalTimeout() is always 10 Minutes, no spring property overrides this, also creating an own Bean
+            // ignores this property being set
+            FutureTask<Subscription> futureTask = new FutureTask<>(() -> {
+                var subscriptionName = ProjectSubscriptionName.of(gcpProjectIdProvider.getProjectId(), serviceProperties.getUpload().getSubscriptionName());
+                return subscriptionAdminClient.getSubscription(subscriptionName); //NodeJS has exists which calls metadata, java doesn't have this :/ This needs Pub/Sub Viewer role
+            });
+            Executors.newSingleThreadExecutor().submit(futureTask);
+            futureTask.get(5, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         } catch (Exception e) {
             LOG.error("Error with Subscription " + serviceProperties.getUpload().getSubscriptionName() + "(" + gcpProjectIdProvider.getProjectId() + ")", e);
             shutdownManager.initiateShutdown(-1);
@@ -60,6 +71,7 @@ public class ImageUploadedReceiver implements MessageReceiver {
         subscriber = pubSubFactory.createSubscriber(serviceProperties.getUpload().getSubscriptionName(),
                 serviceProperties.getUpload().getQueueSize(), serviceProperties.getUpload().getPoolSize(), this);
         subscriber.startAsync().awaitRunning();
+        LOG.debug("Receiver ready");
     }
 
     @PreDestroy

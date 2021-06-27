@@ -1,0 +1,12 @@
+spring:
+  cloud:
+    gcp:
+      pubsub:
+        emulator-host: localhost:7073
+srv:
+  gcp:
+    project-id: image-service-local
+    storage-host: http://localhost:7071
+  upload:
+    bucket: phoenix-cloud-bucket
+    subscriptionName: image-uploaded-sub

@@ -17,7 +17,7 @@ data:
         key-location: /etc/secrets/srv/gcp/key.json
       upload:
         bucket: bucket-string
-        subscriptionName: subcription-string
+        subscriptionName: subscription-string
         pool-size: 3
         queue-size: 100
       redis:

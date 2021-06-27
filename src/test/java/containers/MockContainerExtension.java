@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MockContainerExtension implements BeforeAllCallback, ExtensionContext.Store.CloseableResource {
     private static final AtomicBoolean started = new AtomicBoolean(false);
-    public static String mockProjectId = "image-service-test";
+    public static String mockProjectId = "image-service-local";
     public static String mockTopic = "img-upload-test";
     public static String mockSubscription = "img-upload-test";
     private static DockerComposeContainer<?> environment;
@@ -72,7 +72,7 @@ public class MockContainerExtension implements BeforeAllCallback, ExtensionConte
         System.setProperty("srv.pg.username", "dev");
         System.setProperty("srv.pg.password", "letmein");
         System.setProperty("srv.gcp.project-id", mockProjectId);
-        System.setProperty("srv.upload.bucket", "mock-bucket");
+        System.setProperty("srv.upload.bucket", "local-image-bucket");
         System.setProperty("srv.upload.subscription-name", mockSubscription);
         System.setProperty("srv.redis.url", redisUrl);
         System.setProperty("srv.gcp.storage-host", gcsUrl);
@@ -81,6 +81,10 @@ public class MockContainerExtension implements BeforeAllCallback, ExtensionConte
     }
 
     private void initPubSub(String pubSubEndpoint) {
+        // curl --location --request PUT 'http://localhost:7073/v1/projects/image-service-local/topics/image-uploaded-topic' \
+        //      --header 'Content-Type: application/json' --data-raw '{}'
+        // curl --location --request PUT 'http://localhost:7073/v1/projects/image-service-local/subscriptions/image-uploaded-sub' \
+        //      --header 'Content-Type: application/json' --data-raw '{"topic":"projects/image-service-local/topics/image-uploaded-topic"}'
         ManagedChannel channel = ManagedChannelBuilder.forTarget(pubSubEndpoint).usePlaintext().build();
         try {
             TransportChannelProvider channelProvider =

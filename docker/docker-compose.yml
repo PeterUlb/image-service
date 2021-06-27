@@ -20,8 +20,8 @@ services:
     command: --port 8080
 
   gcp-pubsub-emulator:
-    image: gcr.io/google.com/cloudsdktool/cloud-sdk:316.0.0-emulators
-    command: "gcloud beta emulators pubsub start --project image-service-test --host-port=0.0.0.0:8080"
+    image: gcr.io/google.com/cloudsdktool/cloud-sdk:346.0.0-emulators
+    command: "gcloud beta emulators pubsub start --project image-service-local --host-port=0.0.0.0:8080"
 
 #docker ps
 #docker inspect <postgres_hash> | grep IPAddress

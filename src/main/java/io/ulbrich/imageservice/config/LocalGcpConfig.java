@@ -17,10 +17,8 @@ import java.util.Map;
 import java.util.Random;
 
 @Configuration
-@Profile("test")
-public class GcpTestConfiguration {
-    // No @Primary requires as all are @ConditionalOnMissingBean
-
+@Profile({"local-gcp", "test"})
+public class LocalGcpConfig {
     @Bean
     public Storage storage(CredentialsProvider credentialsProvider, GcpProjectIdProvider gcpProjectIdProvider, ServiceProperties serviceProperties) throws IOException {
         return StorageOptions.newBuilder()
@@ -40,7 +38,6 @@ public class GcpTestConfiguration {
     public GcpProjectIdProvider gcpProjectIdProvider(ServiceProperties serviceProperties) {
         return () -> serviceProperties.getGcp().getProjectId();
     }
-
 
     /**
      * Credentials is needed for the Emulator (injected into multiple places, replaces the DefaultCredentialsProvider)
@@ -69,7 +66,7 @@ public class GcpTestConfiguration {
 
         @Override
         public void refresh() throws IOException {
-
+            // Not needed
         }
 
         @Override
@@ -79,7 +76,7 @@ public class GcpTestConfiguration {
 
         @Override
         public byte[] sign(byte[] toSign) {
-            byte[] b = new byte[1024];
+            var b = new byte[1024];
             new Random().nextBytes(b);
             return b;
         }
