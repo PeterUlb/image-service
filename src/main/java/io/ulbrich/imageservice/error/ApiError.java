@@ -54,6 +54,7 @@ public class ApiError {
     public enum Type {
         ARGUMENTS_INVALID("GEN-INV-ARG", HttpStatus.BAD_REQUEST, "Invalid Arguments"),
         RATE_LIMITED("GEN-RATE", HttpStatus.TOO_MANY_REQUESTS, "Rate Limited"),
+        CAPTCHA_FAILED("CAPTCHA-FAIL", HttpStatus.BAD_REQUEST, "Captcha failed"),
         EXAMPLE_ERROR("GEN-GEN", HttpStatus.CONFLICT, "Example Error");
 
         private final String code;

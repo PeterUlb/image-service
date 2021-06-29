@@ -4,9 +4,10 @@ import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.HttpMethod;
 import com.google.cloud.storage.Storage;
-import io.ulbrich.imageservice.config.ServiceProperties;
+import io.ulbrich.imageservice.config.properties.ServiceProperties;
 import io.ulbrich.imageservice.dto.ImageUploadInfoDto;
 import io.ulbrich.imageservice.dto.ImageUploadRequestDto;
+import io.ulbrich.imageservice.interceptor.CaptchaProtected;
 import io.ulbrich.imageservice.interceptor.RateLimited;
 import io.ulbrich.imageservice.service.ImageService;
 import org.springframework.http.MediaType;
@@ -35,6 +36,7 @@ public class UploadController {
 
     @PostMapping("/request")
     @RateLimited(group = 1)
+    @CaptchaProtected(action = "SIGN_UPLOAD")
     public ResponseEntity<ImageUploadInfoDto> signed(@Valid @RequestBody ImageUploadRequestDto imageUploadRequestDto) {
         String externalKey = imageService.createImageEntry(imageUploadRequestDto, UUID.randomUUID());
 

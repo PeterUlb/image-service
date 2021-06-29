@@ -44,14 +44,14 @@ The following services are expected to run and be configured.
 4. Redis
 5. Keycloak
 
-The docker compose file in `docker/docker-compose.yml` provides the defaults for the required services. This file
-is also used by the integration tests. No ports are necessary, as the ambassador container acts as a proxy.  
-Additionally, `docker/docker-compose.dev.yml` contains useful defaults for the local dev environment (stable ports, persistent db,
-db admin tool, ...).  
-It can be started with the command `docker-compose -f docker-compose.yml -f docker-compose.dev.yml 
-up -d [service1 service2]`. Single components can be configured via configuration (see `dev.yml` above) to use the real 
-service. Make sure to adjust the config to match the service addresses (real or local). The default settings for the
-dev profile match the docker-compose file.
+The docker compose file in `docker/docker-compose.yml` provides the defaults for the required services. This file is
+also used by the integration tests. No ports are necessary, as the ambassador container acts as a proxy.  
+Additionally, `docker/docker-compose.dev.yml` contains useful defaults for the local dev environment (stable ports,
+persistent db, db admin tool, ...).  
+It can be started with the
+command `docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d [service1 service2]`. Single components
+can be configured via configuration (see `dev.yml` above) to use the real service. Make sure to adjust the config to
+match the service addresses (real or local). The default settings for the dev profile match the docker-compose file.
 
 ## How To Test
 

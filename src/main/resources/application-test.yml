@@ -10,3 +10,6 @@ spring:
     gcp:
       storage:
         enabled: false
+srv:
+  captcha:
+    enabled: false

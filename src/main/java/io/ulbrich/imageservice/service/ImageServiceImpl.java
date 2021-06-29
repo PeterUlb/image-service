@@ -3,7 +3,7 @@ package io.ulbrich.imageservice.service;
 import com.google.cloud.storage.BlobId;
 import com.google.cloud.storage.BlobInfo;
 import com.google.cloud.storage.Storage;
-import io.ulbrich.imageservice.config.ServiceProperties;
+import io.ulbrich.imageservice.config.properties.ServiceProperties;
 import io.ulbrich.imageservice.dto.ImageUploadRequestDto;
 import io.ulbrich.imageservice.exception.UnsupportedImageException;
 import io.ulbrich.imageservice.model.Image;

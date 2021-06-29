@@ -5,7 +5,6 @@ import io.ulbrich.imageservice.error.ApiError;
 import io.ulbrich.imageservice.service.RateLimitService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.lang.NonNull;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -36,16 +35,17 @@ public class RateLimiterInterceptor implements HandlerInterceptor {
             return true;
         }
 
-        String subject = request.getHeader("X-FORWARDED-FOR");
+        String subject = request.getHeader("X-Forwarded-For");
         if (subject == null) {
             subject = request.getRemoteAddr();
         }
+        subject = subject.split(",")[0];
 
         try {
             if (rateLimitService.isRateLimited(subject, rateLimited.group())) {
                 var apiError = new ApiError(ApiError.Type.RATE_LIMITED, "Limit exceeded for " + rateLimited.group());
 
-                response.setStatus(HttpStatus.TOO_MANY_REQUESTS.value());
+                response.setStatus(apiError.getStatus().value());
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
                 response.getWriter().write(objectMapper.writeValueAsString(apiError));

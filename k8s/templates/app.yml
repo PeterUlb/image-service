@@ -74,6 +74,9 @@ spec:
             - name: app-secret-pg
               mountPath: /etc/secrets/srv/pg
               readOnly: true
+            - name: app-secret-captcha
+              mountPath: /etc/secrets/srv/captcha
+              readOnly: true
             - name: app-secret-gcp
               mountPath: /etc/secrets/srv/gcp
               readOnly: true
@@ -87,6 +90,11 @@ spec:
           secret:
             defaultMode: 384
             secretName: image-service-pg
+            optional: false
+        - name: app-secret-captcha
+          secret:
+            defaultMode: 384
+            secretName: image-service-captcha
             optional: false
         - name: app-secret-gcp
           secret:

@@ -1,5 +1,6 @@
 package io.ulbrich.imageservice.config;
 
+import io.ulbrich.imageservice.config.properties.ServiceProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import redis.clients.jedis.JedisPool;

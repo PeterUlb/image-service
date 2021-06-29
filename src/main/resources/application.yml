@@ -30,6 +30,10 @@ srv:
   upload:
     pool-size: 3
     queue-size: 100
+  redis:
+    enabled: true
+  captcha:
+    enabled: true
 management:
   endpoint:
     health:
