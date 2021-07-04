@@ -7,15 +7,18 @@ import org.springframework.validation.annotation.Validated;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
+import java.util.Map;
 
 @Configuration
 @ConfigurationProperties(prefix = "srv")
 @Validated
 public class ServiceProperties {
     @Valid
+    @NotNull
     private Redis redis;
 
     @Valid
+    @NotNull
     private Postgres pg;
 
     @Valid
@@ -23,10 +26,16 @@ public class ServiceProperties {
     private Upload upload;
 
     @Valid
+    @NotNull
     private CountryApi countryApi;
 
     @Valid
+    @NotNull
     private Gcp gcp;
+
+    @Valid
+    @NotNull
+    private RateLimitGroups rateLimitGroups;
 
     public Redis getRedis() {
         return redis;
@@ -66,6 +75,14 @@ public class ServiceProperties {
 
     public void setGcp(Gcp gcp) {
         this.gcp = gcp;
+    }
+
+    public RateLimitGroups getRateLimitGroups() {
+        return rateLimitGroups;
+    }
+
+    public void setRateLimitGroups(RateLimitGroups rateLimitGroups) {
+        this.rateLimitGroups = rateLimitGroups;
     }
 
     public static class Redis {
@@ -239,6 +256,28 @@ public class ServiceProperties {
 
         public void setStorageHost(String storageHost) {
             this.storageHost = storageHost;
+        }
+    }
+
+    public static class RateLimitGroups {
+        @NotEmpty
+        private Map<Long, Long> endpointGroupRates;
+        private long defaultRate = 100L;
+
+        public Map<Long, Long> getEndpointGroupRates() {
+            return endpointGroupRates;
+        }
+
+        public void setEndpointGroupRates(Map<Long, Long> endpointGroupRates) {
+            this.endpointGroupRates = endpointGroupRates;
+        }
+
+        public long getDefaultRate() {
+            return defaultRate;
+        }
+
+        public void setDefaultRate(long defaultRate) {
+            this.defaultRate = defaultRate;
         }
     }
 }

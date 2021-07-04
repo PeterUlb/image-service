@@ -5,6 +5,7 @@ import io.ulbrich.imageservice.error.ApiError;
 import io.ulbrich.imageservice.service.RateLimitService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.MessageSource;
 import org.springframework.lang.NonNull;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -18,10 +19,12 @@ public class RateLimiterInterceptor implements HandlerInterceptor {
 
     private final RateLimitService rateLimitService;
     private final ObjectMapper objectMapper;
+    private final MessageSource messageSource;
 
-    public RateLimiterInterceptor(RateLimitService rateLimitService, ObjectMapper objectMapper) {
+    public RateLimiterInterceptor(RateLimitService rateLimitService, ObjectMapper objectMapper, MessageSource messageSource) {
         this.rateLimitService = rateLimitService;
         this.objectMapper = objectMapper;
+        this.messageSource = messageSource;
     }
 
     @Override
@@ -43,9 +46,8 @@ public class RateLimiterInterceptor implements HandlerInterceptor {
 
         try {
             if (rateLimitService.isRateLimited(subject, rateLimited.group())) {
-                var apiError = new ApiError(ApiError.Type.RATE_LIMITED, "Limit exceeded for " + rateLimited.group());
-
-                response.setStatus(apiError.getStatus().value());
+                var apiError = new ApiError.Builder(ApiError.Type.RATE_LIMITED, messageSource).args(new Object[]{rateLimited.group()}).build();
+                response.setStatus(apiError.getStatus());
                 response.setContentType("application/json");
                 response.setCharacterEncoding("UTF-8");
                 response.getWriter().write(objectMapper.writeValueAsString(apiError));

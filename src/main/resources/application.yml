@@ -34,6 +34,12 @@ srv:
     enabled: true
   captcha:
     enabled: true
+  rate-limit-groups:
+    endpoint-group-rates:
+      0: 100
+      1: 100
+      9998: 5
+    default-rate: 100
 management:
   endpoint:
     health:

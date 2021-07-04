@@ -1,5 +1,6 @@
 package io.ulbrich.imageservice.config;
 
+import io.ulbrich.imageservice.config.properties.ServiceProperties;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
@@ -9,13 +10,9 @@ public class RateLimiterConfig {
     private final long defaultRate;
     private Map<Long, Long> endpointGroupRates;
 
-    public RateLimiterConfig() {
-        this.endpointGroupRates = Map.of(
-                0L, 100L,
-                1L, 100L,
-                9998L, 5L
-        );
-        this.defaultRate = 1000L;
+    public RateLimiterConfig(ServiceProperties serviceProperties) {
+        this.endpointGroupRates = serviceProperties.getRateLimitGroups().getEndpointGroupRates();
+        this.defaultRate = serviceProperties.getRateLimitGroups().getDefaultRate();
     }
 
     public long getRateForEndpointGroup(long endpointGroupId) {

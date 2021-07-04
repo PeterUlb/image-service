@@ -29,7 +29,7 @@ public class CaptchaServiceImpl implements CaptchaService {
         if (response == null) {
             return false;
         }
-        LOG.debug("{} {}", response.getScore(), response.getAction());
+        LOG.debug("Answer for {}: {} with {}/1.0 for action '{}'", remoteIp, response.isSuccess(), response.getScore(), response.getAction());
         return response.isSuccess() && response.getScore() > captchaProperties.getThreshold() && action.equals(response.getAction());
     }
 }

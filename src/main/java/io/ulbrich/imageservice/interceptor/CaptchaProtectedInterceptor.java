@@ -6,6 +6,7 @@ import io.ulbrich.imageservice.service.CaptchaService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.MessageSource;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.method.HandlerMethod;
@@ -22,10 +23,12 @@ public class CaptchaProtectedInterceptor implements HandlerInterceptor {
 
     private final CaptchaService captchaService;
     private final ObjectMapper objectMapper;
+    private final MessageSource messageSource;
 
-    public CaptchaProtectedInterceptor(CaptchaService captchaService, ObjectMapper objectMapper) {
+    public CaptchaProtectedInterceptor(CaptchaService captchaService, ObjectMapper objectMapper, MessageSource messageSource) {
         this.captchaService = captchaService;
         this.objectMapper = objectMapper;
+        this.messageSource = messageSource;
     }
 
     @Override
@@ -58,8 +61,8 @@ public class CaptchaProtectedInterceptor implements HandlerInterceptor {
     }
 
     private boolean getInvalidCaptchaResponse(@NonNull HttpServletResponse response) throws IOException {
-        var apiError = new ApiError(ApiError.Type.CAPTCHA_FAILED);
-        response.setStatus(apiError.getStatus().value());
+        var apiError = new ApiError.Builder(ApiError.Type.CAPTCHA_FAILED, messageSource).build();
+        response.setStatus(apiError.getStatus());
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.getWriter().write(objectMapper.writeValueAsString(apiError));

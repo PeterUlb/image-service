@@ -1,6 +1,7 @@
 package io.ulbrich.imageservice.error;
 
 import io.ulbrich.imageservice.exception.ExampleException;
+import org.springframework.context.MessageSource;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +17,15 @@ import java.util.List;
 @ControllerAdvice
 @Order(Ordered.HIGHEST_PRECEDENCE)
 public class RestExceptionHandler {
+    private final MessageSource messageSource;
+
+    public RestExceptionHandler(MessageSource messageSource) {
+        this.messageSource = messageSource;
+    }
+
     @ExceptionHandler(ExampleException.class)
     public ResponseEntity<ApiError> handleExampleException(ExampleException ex) {
-        var apiError = new ApiError(ApiError.Type.EXAMPLE_ERROR, ex.getClass().getName());
+        var apiError = new ApiError.Builder(ApiError.Type.EXAMPLE_ERROR, messageSource).build();
         return ResponseEntity.status(apiError.getStatus()).body(apiError);
     }
 
@@ -32,7 +39,7 @@ public class RestExceptionHandler {
             errors.add(error.getObjectName() + ": " + error.getDefaultMessage());
         }
 
-        var apiError = new ApiError(ApiError.Type.ARGUMENTS_INVALID, errors);
+        var apiError = new ApiError.Builder(ApiError.Type.ARGUMENTS_INVALID, messageSource).errors(errors).build();
         return ResponseEntity.status(apiError.getStatus()).body(apiError);
     }
 }
