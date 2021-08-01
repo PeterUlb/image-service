@@ -55,7 +55,8 @@ public class ApiError {
         ARGUMENTS_INVALID("GEN-INV-ARG", HttpStatus.BAD_REQUEST),
         RATE_LIMITED("GEN-RATE", HttpStatus.TOO_MANY_REQUESTS),
         CAPTCHA_FAILED("CAPTCHA-FAIL", HttpStatus.BAD_REQUEST),
-        EXAMPLE_ERROR("GEN-GEN", HttpStatus.CONFLICT);
+        EXAMPLE_ERROR("GEN-GEN", HttpStatus.CONFLICT),
+        UNSUPPORTED_IMAGE("IMG-FORMAT-INV", HttpStatus.BAD_REQUEST);
 
         private final String code;
         private final HttpStatus status;

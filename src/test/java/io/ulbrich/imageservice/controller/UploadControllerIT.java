@@ -45,7 +45,7 @@ class UploadControllerIT {
     @Test
     void testSignRequestSizeRejected() throws Exception {
         long size = 50 * 1024 * 1024;
-        ImageUploadRequestDto hugeImage = new ImageUploadRequestDto("Huge Image", "A really huge image", "test.png", size, ImagePrivacy.PRIVATE, List.of("test"));
+        ImageUploadRequestDto hugeImage = new ImageUploadRequestDto("Huge Image", "A really huge image", "image/png", "test.png", size, ImagePrivacy.PRIVATE, List.of("test"));
 
         var objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(hugeImage);
@@ -59,7 +59,7 @@ class UploadControllerIT {
     @Test
     void testSignRequestAccepted() throws Exception {
         long size = 3 * 1024 * 1024;
-        ImageUploadRequestDto normalImage = new ImageUploadRequestDto("Normal Image", "Just a normal image", "test.png", size, ImagePrivacy.PRIVATE, List.of("test"));
+        ImageUploadRequestDto normalImage = new ImageUploadRequestDto("Normal Image", "Just a normal image", "image/png", "test.png", size, ImagePrivacy.PRIVATE, List.of("test"));
 
         var objectMapper = new ObjectMapper();
         String json = objectMapper.writeValueAsString(normalImage);

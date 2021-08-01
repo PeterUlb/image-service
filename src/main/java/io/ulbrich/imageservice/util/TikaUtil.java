@@ -10,6 +10,7 @@ import org.xml.sax.SAXException;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
@@ -78,6 +79,10 @@ public class TikaUtil {
     }
 
     public Optional<String> getContentType(Metadata metadata) {
-        return Optional.ofNullable(metadata.get("Content-Type"));
+        String contentType = metadata.get("Content-Type");
+        if (contentType != null) {
+            contentType = contentType.toLowerCase(Locale.ROOT);
+        }
+        return Optional.ofNullable(contentType);
     }
 }

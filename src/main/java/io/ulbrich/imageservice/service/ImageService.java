@@ -12,4 +12,6 @@ public interface ImageService {
     void processImageAfterUpload(String imageKey) throws UnsupportedImageException;
 
     Set<String> getSignedUrlsByTag(String tag);
+
+    boolean isSupportedContentType(String contentType);
 }

@@ -12,6 +12,7 @@ import com.google.pubsub.v1.TopicName;
 import containers.MockContainerExtension;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.ulbrich.imageservice.dto.ImageUploadRequestDto;
 import io.ulbrich.imageservice.model.Image;
 import io.ulbrich.imageservice.model.ImagePrivacy;
 import io.ulbrich.imageservice.model.ImageStatus;
@@ -46,8 +47,10 @@ class ImageUploadedReceiverIT {
 
     @Test
     void testPubSubConfirm() throws Exception {
-        imageRepository.save(Image.withInitialState("BVXErLFEgv", UUID.randomUUID(), "mock", "mock",
-                "mock.png", 200L, ImagePrivacy.PUBLIC, Collections.emptySet()));
+        var image = Image.withInitialState(UUID.randomUUID(), new ImageUploadRequestDto("mock", "mock",
+                "image/png", "mock.png", 200L, ImagePrivacy.PUBLIC, Collections.emptyList()), Collections.emptySet());
+        image.setExternalKey("BVXErLFEgv");
+        imageRepository.save(image);
         imageRepository.flush();
 
         ManagedChannel channel = ManagedChannelBuilder.forTarget(endpointOverride).usePlaintext().build();
@@ -72,7 +75,7 @@ class ImageUploadedReceiverIT {
             var imageStatus = imageRepository.findByExternalKey("BVXErLFEgv").orElseThrow().getImageStatus();
             return imageStatus.equals(ImageStatus.VERIFIED);
         });
-        var image = imageRepository.findByExternalKey("BVXErLFEgv").orElse(null);
+        image = imageRepository.findByExternalKey("BVXErLFEgv").orElse(null);
         assertThat(image).isNotNull();
         assertThat(image.getImageStatus()).isEqualTo(ImageStatus.VERIFIED);
     }

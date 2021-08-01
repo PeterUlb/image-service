@@ -92,7 +92,7 @@ public class ImageUploadedReceiver implements MessageReceiver {
             LOG.debug(key);
             imageService.processImageAfterUpload(key);
         } catch (JsonProcessingException e) {
-            e.printStackTrace();
+            LOG.error("Error processing json", e);
         } finally {
             consumer.ack();
         }

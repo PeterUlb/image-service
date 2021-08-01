@@ -1,7 +1,11 @@
 package io.ulbrich.imageservice.model;
 
+import io.ulbrich.imageservice.dto.ImageUploadRequestDto;
+import org.apache.commons.lang3.RandomStringUtils;
+
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
 
@@ -62,17 +66,18 @@ public class Image {
     @Column(insertable = false)
     private LocalDateTime updatedAt;
 
-    public static Image withInitialState(String externalKey, UUID accountId, String title, String description, String fileName, Long size, ImagePrivacy privacy, Set<ImageTag> tags) {
+    public static Image withInitialState(UUID accountId, ImageUploadRequestDto imageUploadRequestDto, Set<ImageTag> tags) {
         var image = new Image();
-        image.setExternalKey(externalKey);
+        image.setExternalKey(RandomStringUtils.randomAlphanumeric(10));
         image.setAccountId(accountId);
-        image.setTitle(title);
-        image.setDescription(description);
-        image.setFilename(fileName);
-        image.setSize(size);
+        image.setTitle(imageUploadRequestDto.title());
+        image.setDescription(imageUploadRequestDto.description());
+        image.setFilename(imageUploadRequestDto.fileName());
+        image.setMimeType(imageUploadRequestDto.mimeType().toLowerCase(Locale.ROOT));
+        image.setSize(imageUploadRequestDto.size());
         image.setImageStatus(ImageStatus.REQUESTED);
         image.setTags(tags);
-        image.setPrivacy(privacy);
+        image.setPrivacy(imageUploadRequestDto.privacy());
         return image;
     }
 

@@ -1,6 +1,7 @@
 package io.ulbrich.imageservice.error;
 
 import io.ulbrich.imageservice.exception.ExampleException;
+import io.ulbrich.imageservice.exception.UnsupportedImageException;
 import org.springframework.context.MessageSource;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
@@ -24,22 +25,28 @@ public class RestExceptionHandler {
     }
 
     @ExceptionHandler(ExampleException.class)
-    public ResponseEntity<ApiError> handleExampleException(ExampleException ex) {
+    public ResponseEntity<ApiError> handleExampleException(ExampleException e) {
         var apiError = new ApiError.Builder(ApiError.Type.EXAMPLE_ERROR, messageSource).build();
         return ResponseEntity.status(apiError.getStatus()).body(apiError);
     }
 
     @ExceptionHandler(BindException.class)
-    public ResponseEntity<ApiError> handleBindException(BindException ex) {
+    public ResponseEntity<ApiError> handleBindException(BindException e) {
         List<String> errors = new ArrayList<>();
-        for (FieldError error : ex.getBindingResult().getFieldErrors()) {
+        for (FieldError error : e.getBindingResult().getFieldErrors()) {
             errors.add(error.getField() + ": " + error.getDefaultMessage());
         }
-        for (ObjectError error : ex.getBindingResult().getGlobalErrors()) {
+        for (ObjectError error : e.getBindingResult().getGlobalErrors()) {
             errors.add(error.getObjectName() + ": " + error.getDefaultMessage());
         }
 
         var apiError = new ApiError.Builder(ApiError.Type.ARGUMENTS_INVALID, messageSource).errors(errors).build();
+        return ResponseEntity.status(apiError.getStatus()).body(apiError);
+    }
+
+    @ExceptionHandler(UnsupportedImageException.class)
+    public ResponseEntity<ApiError> handleExampleException(UnsupportedImageException e) {
+        var apiError = new ApiError.Builder(ApiError.Type.UNSUPPORTED_IMAGE, messageSource).args(new String[]{e.getDetectedType()}).build();
         return ResponseEntity.status(apiError.getStatus()).body(apiError);
     }
 }

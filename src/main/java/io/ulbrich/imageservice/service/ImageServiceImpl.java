@@ -11,7 +11,6 @@ import io.ulbrich.imageservice.model.ImageStatus;
 import io.ulbrich.imageservice.model.ImageTag;
 import io.ulbrich.imageservice.repository.ImageRepository;
 import io.ulbrich.imageservice.util.TikaUtil;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MimeTypeException;
@@ -51,22 +50,15 @@ public class ImageServiceImpl implements ImageService {
     public String createImageEntry(ImageUploadRequestDto imageUploadRequestDto, UUID accountId) {
         Set<ImageTag> tags;
         // First try to insert the missing tags
-        if (imageUploadRequestDto.getTags() != null && !imageUploadRequestDto.getTags().isEmpty()) {
-            insertMissingImageTags(imageUploadRequestDto.getTags());
+        if (imageUploadRequestDto.tags() != null && !imageUploadRequestDto.tags().isEmpty()) {
+            insertMissingImageTags(imageUploadRequestDto.tags());
             // Now get all ids for the relevant tags, at this point all must exist
-            tags = imageUploadRequestDto.getTags().stream().map(s -> imageTagService.find(s).orElseThrow()).collect(Collectors.toSet());
+            tags = imageUploadRequestDto.tags().stream().map(s -> imageTagService.find(s).orElseThrow()).collect(Collectors.toSet());
         } else {
             tags = null;
         }
 
-        var image = Image.withInitialState(generateExternalKey(),
-                accountId,
-                imageUploadRequestDto.getTitle(),
-                imageUploadRequestDto.getDescription(),
-                imageUploadRequestDto.getFileName(),
-                imageUploadRequestDto.getSize(),
-                imageUploadRequestDto.getPrivacy(),
-                tags);
+        var image = Image.withInitialState(accountId, imageUploadRequestDto, tags);
         imageRepository.save(image);
         return image.getExternalKey();
     }
@@ -95,8 +87,14 @@ public class ImageServiceImpl implements ImageService {
 
         try (var inputStream = Channels.newInputStream(blob.reader())) {
             metadata = tikaUtil.extractMetadata(inputStream);
-        } catch (IOException | TikaException | SAXException e) {
+        } catch (IOException | TikaException | SAXException | NoSuchFieldError e) {
             LOG.error("Error while reading object: " + e.getMessage());
+            image.setImageStatus(ImageStatus.REJECTED);
+            return;
+        } catch (Exception e) {
+            // E.g. PDF Parser likes to throw NoSuchFieldException, basically any parser could throw an exception
+            // for some reason (which isn't a TikaException), so in this case, we also reject
+            LOG.error("Unexpected exception while reading object: {}", e.getMessage());
             image.setImageStatus(ImageStatus.REJECTED);
             return;
         }
@@ -104,18 +102,11 @@ public class ImageServiceImpl implements ImageService {
         var mimeType = tikaUtil.getContentType(metadata).orElseThrow(); // TODO
         LOG.debug(mimeType);
 
-        boolean supported = switch (mimeType) {
-            case "image/png", "image/jpeg", "image/gif" -> true;
-            default -> false;
-        };
-
-        if (!supported) {
-            // TODO: DELETE, SET IMAGE STATUS, ...
-            LOG.debug("Reject image of type {}", mimeType);
+        if (!isSupportedContentType(mimeType) || !image.getMimeType().equals(mimeType)) {
+            LOG.warn("Reject image of type {}, expected {}", mimeType, image.getMimeType());
             image.setImageStatus(ImageStatus.REJECTED);
             image.setWidth(null);
             image.setHeight(null);
-            image.setMimeType(mimeType);
             image.setExtension(null);
             image.setSize(blob.getSize());
             storage.delete(serviceProperties.getUpload().getBucket(), imageKey);
@@ -166,6 +157,14 @@ public class ImageServiceImpl implements ImageService {
         return signedUrls;
     }
 
+    @Override
+    public boolean isSupportedContentType(String contentType) {
+        return switch (contentType.toLowerCase(Locale.ROOT)) {
+            case "image/png", "image/jpeg", "image/gif" -> true;
+            default -> false;
+        };
+    }
+
     private void insertMissingImageTags(List<String> tags) {
         Set<String> existingTags = imageTagService.find(tags).stream().map(ImageTag::getTag).collect(Collectors.toSet());
 
@@ -178,9 +177,5 @@ public class ImageServiceImpl implements ImageService {
         }
 
         LOG.debug("Inserted {} missing tags", inserted);
-    }
-
-    private String generateExternalKey() {
-        return RandomStringUtils.randomAlphanumeric(10);
     }
 }

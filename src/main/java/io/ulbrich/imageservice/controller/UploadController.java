@@ -7,6 +7,7 @@ import com.google.cloud.storage.Storage;
 import io.ulbrich.imageservice.config.properties.ServiceProperties;
 import io.ulbrich.imageservice.dto.ImageUploadInfoDto;
 import io.ulbrich.imageservice.dto.ImageUploadRequestDto;
+import io.ulbrich.imageservice.exception.UnsupportedImageException;
 import io.ulbrich.imageservice.interceptor.CaptchaProtected;
 import io.ulbrich.imageservice.interceptor.RateLimited;
 import io.ulbrich.imageservice.service.ImageService;
@@ -15,10 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @RestController
@@ -38,6 +36,10 @@ public class UploadController {
     @RateLimited(group = 1)
     @CaptchaProtected(action = "SIGN_UPLOAD")
     public ResponseEntity<ImageUploadInfoDto> signed(@Valid @RequestBody ImageUploadRequestDto imageUploadRequestDto) {
+        if (!imageService.isSupportedContentType(imageUploadRequestDto.mimeType())) {
+            throw new UnsupportedImageException(imageUploadRequestDto.mimeType());
+        }
+
         String externalKey = imageService.createImageEntry(imageUploadRequestDto, UUID.randomUUID());
 
         var blobInfo = BlobInfo.newBuilder(BlobId.of(serviceProperties.getUpload().getBucket(), "images/" + externalKey))
@@ -45,8 +47,8 @@ public class UploadController {
                 .setMetadata(Map.of("owner", "TEST")) //jwt.getSubject()))
                 .build();
         Map<String, String> extensionHeaders = new HashMap<>();
-        extensionHeaders.put("x-goog-content-length-range", "1," + imageUploadRequestDto.getSize());
-        extensionHeaders.put("Content-Type", "image/png");
+        extensionHeaders.put("x-goog-content-length-range", "1," + imageUploadRequestDto.size());
+        extensionHeaders.put("Content-Type", imageUploadRequestDto.mimeType().toLowerCase(Locale.ROOT));
 
         var url =
                 storage.signUrl(
@@ -59,7 +61,7 @@ public class UploadController {
 
         return ResponseEntity.ok(new ImageUploadInfoDto(url.toExternalForm(),
                 HttpMethod.PUT.name(),
-                Map.of("x-goog-content-length-range", "1," + imageUploadRequestDto.getSize())
+                Map.of("x-goog-content-length-range", "1," + imageUploadRequestDto.size())
         ));
     }
 
