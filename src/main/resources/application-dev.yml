@@ -17,4 +17,4 @@ srv:
   redis:
     url: redis://localhost:6379
   country-api:
-    url: https://restcountries.eu/rest
+    url: https://restcountries.com
